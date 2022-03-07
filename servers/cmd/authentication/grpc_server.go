@@ -15,5 +15,7 @@ func NewAuthenticationServer() models.AuthenticationServer {
 }
 
 func (a *AuthenticationServer) Login(ctx context.Context, request *models.LoginRequest) (*models.LoginResponse, error) {
-	return nil, nil
+	return &models.LoginResponse{
+		Token: "token",
+	}, nil
 }
