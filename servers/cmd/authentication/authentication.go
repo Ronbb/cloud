@@ -16,6 +16,7 @@ import (
 const (
 	httpPort = "5751"
 	grpcPort = "5752"
+	name     = "authentication"
 )
 
 var (
@@ -27,15 +28,15 @@ var (
 
 	// Create a customized counter metric.
 	customizedCounterMetric = prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "demo_server_say_hello_method_handle_count",
+		Name: "authentication_server_handle_count",
 		Help: "Total number of RPCs handled on the server.",
-	}, []string{"name"})
+	}, []string{name})
 )
 
 func init() {
 	// Register standard server metrics and customized metrics to registry.
 	reg.MustRegister(grpcMetrics, customizedCounterMetric)
-	customizedCounterMetric.WithLabelValues("Test")
+	customizedCounterMetric.WithLabelValues(name)
 }
 
 func main() {
@@ -66,12 +67,21 @@ func main() {
 
 	// Create a HTTP server for prometheus.
 	httpServer := echo.New()
+	httpServerAddress := net.JoinHostPort("127.0.0.1", httpPort)
+	RegisterHTTPMiddlerware(httpServer)
 	RegisterHTTPFromGRPC(httpServer, authServer)
-	httpServer.Any("/metrics", echo.WrapHandler(promhttp.HandlerFor(reg, promhttp.HandlerOpts{})))
+	httpServer.Any("/metrics/grpc", echo.WrapHandler(promhttp.HandlerFor(reg, promhttp.HandlerOpts{})))
 	go func() {
-		err := httpServer.Start(net.JoinHostPort("127.0.0.1", httpPort))
+		err := httpServer.Start(httpServerAddress)
 		if err != nil {
 			log.Fatalf("Unable to start a http server %v", err)
+		}
+	}()
+
+	go func() {
+		_, err := RegisterServer(name, httpServerAddress)
+		if err != nil {
+			log.Fatalf("Unable to register server %v", err)
 		}
 	}()
 

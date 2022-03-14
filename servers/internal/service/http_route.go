@@ -1,9 +1,10 @@
-package main
+package service
 
 import (
 	"context"
 	"net/http"
 	"reflect"
+	"strings"
 
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
@@ -35,8 +36,8 @@ func init() {
 	grpcMethodOut[1] = err
 }
 
-func RegisterHTTPFromGRPC(app *echo.Echo, grpc interface{}) {
-	ptr := reflect.ValueOf(grpc)
+func (s *service) registerHTTPFromGRPC() {
+	ptr := reflect.ValueOf(s.server)
 	if ptr.Kind() != reflect.Ptr {
 		return
 	}
@@ -65,7 +66,7 @@ method_loop:
 			}
 		}
 
-		app.Any("/"+method.Name, func(c echo.Context) error {
+		s.httpServer.Any("/"+method.Name, func(c echo.Context) error {
 			req := reflect.New(funType.In(1).Elem())
 
 			err := c.Bind(req.Interface())
@@ -88,7 +89,12 @@ method_loop:
 	}
 }
 
-func RegisterHTTPMiddlerware(app *echo.Echo) {
-	app.Use(middleware.Recover())
-	prometheus.NewPrometheus(name, nil).Use(app)
+func (s *service) registerHTTPMiddlerware() {
+	s.httpServer.Use(middleware.Recover())
+	prometheus.NewPrometheus(
+		s.config.Name,
+		func(c echo.Context) bool {
+			return strings.HasPrefix(c.Request().URL.Path, "/metrics")
+		},
+	).Use(s.httpServer)
 }
