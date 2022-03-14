@@ -92,7 +92,7 @@ method_loop:
 func (s *service) registerHTTPMiddlerware() {
 	s.httpServer.Use(middleware.Recover())
 	prometheus.NewPrometheus(
-		s.config.Name,
+		s.config.HTTP.Name,
 		func(c echo.Context) bool {
 			return strings.HasPrefix(c.Request().URL.Path, "/metrics")
 		},

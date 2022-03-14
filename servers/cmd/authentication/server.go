@@ -6,6 +6,8 @@ import (
 	"github.com/ronbb/servers/models"
 )
 
+var AuthenticationServerDescription = &models.Authentication_ServiceDesc
+
 type AuthenticationServer struct {
 	models.UnimplementedAuthenticationServer
 }

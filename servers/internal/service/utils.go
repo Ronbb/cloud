@@ -6,5 +6,5 @@ import (
 )
 
 func address(port int) string {
-	return net.JoinHostPort("localhost", fmt.Sprint(port))
+	return net.JoinHostPort("127.0.0.1", fmt.Sprint(port))
 }

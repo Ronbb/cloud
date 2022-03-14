@@ -2,7 +2,6 @@ package service
 
 import (
 	"net/url"
-	"strconv"
 
 	consul "github.com/hashicorp/consul/api"
 )
@@ -15,31 +14,60 @@ func (s *service) registerServerToDataCenter() (*consul.Client, error) {
 	}
 	s.registerClient = client
 
-	address := url.URL{
+	baseAddress := url.URL{
 		Scheme: "http",
 		Host:   address(s.config.HTTP.Port),
 	}
 
-	healthCheckURL := address.ResolveReference(&url.URL{
+	httpHealthCheckURL := baseAddress.ResolveReference(&url.URL{
 		Path: "metrics",
 	})
 
-	httpServerPort, err := strconv.Atoi(address.Port())
+	grpcHealthCheckURL := baseAddress.ResolveReference(&url.URL{
+		Path: "metrics/grpc",
+	})
+
+	hostName := baseAddress.Hostname()
+
+	client.Agent().ServiceDeregister(s.config.HTTP.Name)
+
+	client.Agent().ServiceDeregister(s.config.GRPC.Name)
+
+	// Register HTTP
+	err = client.Agent().ServiceRegister(
+		&consul.AgentServiceRegistration{
+			Name:    s.config.HTTP.Name,
+			ID:      s.config.HTTP.Name,
+			Address: hostName,
+			Port:    s.config.HTTP.Port,
+			Check: &consul.AgentServiceCheck{
+				HTTP:                           httpHealthCheckURL.String(),
+				Interval:                       "5s",
+				Timeout:                        "3s",
+				DeregisterCriticalServiceAfter: "5s",
+			},
+		},
+	)
+
 	if err != nil {
-		return nil, err
+		return client, err
 	}
 
-	err = client.Agent().ServiceRegister(&consul.AgentServiceRegistration{
-		Name:    s.config.Name,
-		ID:      s.config.Name,
-		Address: address.Hostname(),
-		Port:    httpServerPort,
-		Check: &consul.AgentServiceCheck{
-			HTTP:     healthCheckURL.String(),
-			Interval: "5s",
-			Timeout:  "3s",
+	// Register GRPC
+	err = client.Agent().ServiceRegister(
+		&consul.AgentServiceRegistration{
+			Name:    s.config.GRPC.Name,
+			ID:      s.config.GRPC.Name,
+			Address: hostName,
+			Port:    s.config.GRPC.Port,
+			Check: &consul.AgentServiceCheck{
+				HTTP:                           grpcHealthCheckURL.String(),
+				Interval:                       "5s",
+				Timeout:                        "3s",
+				DeregisterCriticalServiceAfter: "5s",
+			},
 		},
-	})
+	)
 
 	if err != nil {
 		return client, err

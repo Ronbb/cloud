@@ -14,7 +14,9 @@ import (
 )
 
 type (
-	Service interface{}
+	Service interface {
+		Start() error
+	}
 
 	service struct {
 		config          *Config
@@ -34,6 +36,11 @@ func Create(server interface{}, description *grpc.ServiceDesc, config *Config) (
 		server:          server,
 		grpcDescription: description,
 		config:          config,
+	}
+
+	err := s.initConfig()
+	if err != nil {
+		return nil, err
 	}
 
 	// Create a metrics registry.
@@ -77,6 +84,7 @@ func Create(server interface{}, description *grpc.ServiceDesc, config *Config) (
 	// Create a HTTP server for prometheus.
 	httpServer := echo.New()
 	s.httpServer = httpServer
+	httpServer.HideBanner = true
 	s.registerHTTPMiddlerware()
 	s.registerHTTPFromGRPC()
 	httpServer.Any(
@@ -84,7 +92,9 @@ func Create(server interface{}, description *grpc.ServiceDesc, config *Config) (
 		echo.WrapHandler(
 			promhttp.HandlerFor(
 				registry,
-				promhttp.HandlerOpts{},
+				promhttp.HandlerOpts{
+					Registry: s.registry,
+				},
 			),
 		),
 	)
