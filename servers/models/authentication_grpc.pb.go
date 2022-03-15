@@ -24,6 +24,8 @@ const _ = grpc.SupportPackageIsVersion7
 type AuthenticationClient interface {
 	// login
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	// heart beat
+	KeepAlive(ctx context.Context, opts ...grpc.CallOption) (Authentication_KeepAliveClient, error)
 }
 
 type authenticationClient struct {
@@ -43,12 +45,45 @@ func (c *authenticationClient) Login(ctx context.Context, in *LoginRequest, opts
 	return out, nil
 }
 
+func (c *authenticationClient) KeepAlive(ctx context.Context, opts ...grpc.CallOption) (Authentication_KeepAliveClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Authentication_ServiceDesc.Streams[0], "/Authentication/KeepAlive", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &authenticationKeepAliveClient{stream}
+	return x, nil
+}
+
+type Authentication_KeepAliveClient interface {
+	Send(*HeartBeat) error
+	Recv() (*HeartBeat, error)
+	grpc.ClientStream
+}
+
+type authenticationKeepAliveClient struct {
+	grpc.ClientStream
+}
+
+func (x *authenticationKeepAliveClient) Send(m *HeartBeat) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *authenticationKeepAliveClient) Recv() (*HeartBeat, error) {
+	m := new(HeartBeat)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // AuthenticationServer is the server API for Authentication service.
 // All implementations must embed UnimplementedAuthenticationServer
 // for forward compatibility
 type AuthenticationServer interface {
 	// login
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	// heart beat
+	KeepAlive(Authentication_KeepAliveServer) error
 	mustEmbedUnimplementedAuthenticationServer()
 }
 
@@ -58,6 +93,9 @@ type UnimplementedAuthenticationServer struct {
 
 func (UnimplementedAuthenticationServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedAuthenticationServer) KeepAlive(Authentication_KeepAliveServer) error {
+	return status.Errorf(codes.Unimplemented, "method KeepAlive not implemented")
 }
 func (UnimplementedAuthenticationServer) mustEmbedUnimplementedAuthenticationServer() {}
 
@@ -90,6 +128,32 @@ func _Authentication_Login_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Authentication_KeepAlive_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(AuthenticationServer).KeepAlive(&authenticationKeepAliveServer{stream})
+}
+
+type Authentication_KeepAliveServer interface {
+	Send(*HeartBeat) error
+	Recv() (*HeartBeat, error)
+	grpc.ServerStream
+}
+
+type authenticationKeepAliveServer struct {
+	grpc.ServerStream
+}
+
+func (x *authenticationKeepAliveServer) Send(m *HeartBeat) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *authenticationKeepAliveServer) Recv() (*HeartBeat, error) {
+	m := new(HeartBeat)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // Authentication_ServiceDesc is the grpc.ServiceDesc for Authentication service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -102,6 +166,13 @@ var Authentication_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Authentication_Login_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "KeepAlive",
+			Handler:       _Authentication_KeepAlive_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "authentication.proto",
 }

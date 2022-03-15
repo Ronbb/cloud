@@ -9,83 +9,70 @@ import (
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"google.golang.org/protobuf/proto"
+	"github.com/ronbb/servers/internal/utils"
 )
 
 const (
-	grpcMethodNumIn  = 2
-	grpcMethodNumOut = 2
+	grpcMethodNumIn            = 2
+	grpcMethodNumOut           = 2
+	grpcMethodInContextIndex   = 0
+	grpcMethodInRequestIndex   = 1
+	grpcMethodOutResponseIndex = 0
+	grpcMethodOutErrorIndex    = 1
+	grpcStreamNumIn            = 1
+	grpcStreamNumOut           = 1
 )
-
-var (
-	grpcMethodIn  []reflect.Type
-	grpcMethodOut []reflect.Type
-)
-
-func init() {
-	grpcMethodIn = make([]reflect.Type, grpcMethodNumIn)
-	grpcMethodOut = make([]reflect.Type, grpcMethodNumOut)
-
-	ctx := reflect.TypeOf((*context.Context)(nil)).Elem()
-	pb := reflect.TypeOf((*proto.Message)(nil)).Elem()
-	err := reflect.TypeOf((*error)(nil)).Elem()
-
-	grpcMethodIn[0] = ctx
-	grpcMethodIn[1] = pb
-	grpcMethodOut[0] = pb
-	grpcMethodOut[1] = err
-}
 
 func (s *service) registerHTTPFromGRPC() {
-	name := s.config.Name
-	ptr := reflect.ValueOf(s.server)
-	if ptr.Kind() != reflect.Ptr {
-		return
+	name := s.config.HTTP.Name
+	server := reflect.ValueOf(s.server)
+
+	description := s.grpcDescription
+	methodDescriptions := description.Methods
+	streamDescriptions := description.Streams
+
+	path := func(api string) string {
+		return "/" + name + "/" + utils.ToSnakeCase(api)
 	}
-	count := ptr.NumMethod()
-	typ := ptr.Type()
 
-method_loop:
-	for i := 0; i < count; i++ {
-		method := typ.Method(i)
-		fun := ptr.Method(i)
-		funType := fun.Type()
+	for _, description := range methodDescriptions {
+		name := description.MethodName
+		method := server.MethodByName(name)
 
-		if funType.NumIn() != grpcMethodNumIn || funType.NumOut() != grpcMethodNumOut {
-			continue
-		}
+		s.httpServer.Any(path(name), func(c echo.Context) error {
+			request := reflect.New(method.Type().In(grpcMethodInRequestIndex).Elem())
 
-		for in := 0; in < grpcMethodNumIn; in++ {
-			if !funType.In(in).Implements(grpcMethodIn[in]) {
-				break method_loop
-			}
-		}
-
-		for out := 0; out < grpcMethodNumOut; out++ {
-			if !funType.Out(out).Implements(grpcMethodOut[out]) {
-				break method_loop
-			}
-		}
-
-		s.httpServer.Any("/"+name+"/"+method.Name, func(c echo.Context) error {
-			req := reflect.New(funType.In(1).Elem())
-
-			err := c.Bind(req.Interface())
+			err := c.Bind(request.Interface())
 			if err != nil {
 				return err
 			}
 
-			rets := fun.Call([]reflect.Value{
+			returns := method.Call([]reflect.Value{
 				reflect.ValueOf(context.Background()),
-				req,
+				request,
 			})
 
-			if !rets[1].IsNil() {
-				return rets[1].Interface().(error)
+			returnError := returns[grpcMethodOutErrorIndex]
+			if !returnError.IsNil() {
+				return returnError.Interface().(error)
 			}
 
-			res := rets[0]
-			return c.JSON(http.StatusOK, res.Interface())
+			response := returns[grpcMethodOutResponseIndex]
+			return c.JSON(http.StatusOK, response.Interface())
+		})
+	}
+
+	for _, description := range streamDescriptions {
+		name := description.StreamName
+		handler := description.Handler
+
+		s.httpServer.Any(path(name), func(c echo.Context) error {
+			ss, err := newServerStream(c)
+			if err != nil {
+				return err
+			}
+			handler(s.server, ss)
+			return nil
 		})
 	}
 }

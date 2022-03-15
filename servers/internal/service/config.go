@@ -2,7 +2,8 @@ package service
 
 import (
 	"errors"
-	"strings"
+
+	"github.com/ronbb/servers/internal/utils"
 )
 
 type (
@@ -33,7 +34,7 @@ func (s *service) initConfig() error {
 	}
 
 	if s.config.Name == "" {
-		s.config.Name = strings.ToLower(s.grpcDescription.ServiceName)
+		s.config.Name = utils.ToSnakeCase(s.grpcDescription.ServiceName)
 	}
 
 	if s.config.GRPC.Name == "" {

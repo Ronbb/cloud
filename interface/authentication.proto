@@ -7,6 +7,8 @@ option go_package = "github.com/ronbb/servers/models";
 service Authentication {
   // login
   rpc Login(LoginRequest) returns (LoginResponse);
+  // heart beat
+  rpc KeepAlive(stream HeartBeat) returns (stream HeartBeat);
 }
 
 // Login request
@@ -21,4 +23,9 @@ message LoginRequest {
 message LoginResponse {
   // access token
   string token = 1;
+}
+
+// HeartBeat
+message HeartBeat {
+  // empty
 }

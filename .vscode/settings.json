@@ -6,6 +6,7 @@
     "LTRB",
     "protobuf",
     "protoimpl",
-    "ronbb"
+    "ronbb",
+    "Upgrader"
   ]
 }
