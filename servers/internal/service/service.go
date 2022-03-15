@@ -3,13 +3,11 @@ package service
 import (
 	"log"
 	"net"
-	"net/http"
 
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	consul "github.com/hashicorp/consul/api"
 	"github.com/labstack/echo/v4"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 )
 
@@ -44,7 +42,7 @@ func Create(server interface{}, description *grpc.ServiceDesc, config *Config) (
 	}
 
 	// Create a metrics registry.
-	registry := prometheus.NewRegistry()
+	registry := prometheus.DefaultRegisterer.(*prometheus.Registry)
 	s.registry = registry
 
 	// Create some standard server metrics.
@@ -59,7 +57,8 @@ func Create(server interface{}, description *grpc.ServiceDesc, config *Config) (
 	s.grpcCounter = grpcCounter
 
 	// Register standard server metrics and customized metrics to registry.
-	registry.MustRegister(grpcMetrics, grpcCounter)
+	registry.Register(grpcMetrics)
+	registry.Register(grpcCounter)
 	grpcCounter.WithLabelValues("Counter")
 
 	// Create a gRPC Server with gRPC interceptor.
@@ -78,26 +77,12 @@ func Create(server interface{}, description *grpc.ServiceDesc, config *Config) (
 	// Initialize all metrics.
 	grpcMetrics.InitializeMetrics(grpcServer)
 
-	// Register Prometheus metrics handler.
-	http.Handle("/metrics", promhttp.Handler())
-
 	// Create a HTTP server for prometheus.
 	httpServer := echo.New()
 	s.httpServer = httpServer
 	httpServer.HideBanner = true
 	s.registerHTTPMiddlerware()
 	s.registerHTTPFromGRPC()
-	httpServer.Any(
-		"/metrics/grpc",
-		echo.WrapHandler(
-			promhttp.HandlerFor(
-				registry,
-				promhttp.HandlerOpts{
-					Registry: s.registry,
-				},
-			),
-		),
-	)
 
 	return s, nil
 }

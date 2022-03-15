@@ -19,49 +19,26 @@ func (s *service) registerServerToDataCenter() (*consul.Client, error) {
 		Host:   address(s.config.HTTP.Port),
 	}
 
-	httpHealthCheckURL := baseAddress.ResolveReference(&url.URL{
+	healthCheckURL := baseAddress.ResolveReference(&url.URL{
 		Path: "metrics",
-	})
-
-	grpcHealthCheckURL := baseAddress.ResolveReference(&url.URL{
-		Path: "metrics/grpc",
 	})
 
 	hostName := baseAddress.Hostname()
 
 	client.Agent().ServiceDeregister(s.config.HTTP.Name)
 
-	client.Agent().ServiceDeregister(s.config.GRPC.Name)
-
-	// Register HTTP
+	// Register
 	err = client.Agent().ServiceRegister(
 		&consul.AgentServiceRegistration{
 			Name:    s.config.HTTP.Name,
 			ID:      s.config.HTTP.Name,
 			Address: hostName,
 			Port:    s.config.HTTP.Port,
-			Check: &consul.AgentServiceCheck{
-				HTTP:                           httpHealthCheckURL.String(),
-				Interval:                       "5s",
-				Timeout:                        "3s",
-				DeregisterCriticalServiceAfter: "5s",
+			Meta: map[string]string{
+				grpcAddressLabel: address(s.config.GRPC.Port),
 			},
-		},
-	)
-
-	if err != nil {
-		return client, err
-	}
-
-	// Register GRPC
-	err = client.Agent().ServiceRegister(
-		&consul.AgentServiceRegistration{
-			Name:    s.config.GRPC.Name,
-			ID:      s.config.GRPC.Name,
-			Address: hostName,
-			Port:    s.config.GRPC.Port,
 			Check: &consul.AgentServiceCheck{
-				HTTP:                           grpcHealthCheckURL.String(),
+				HTTP:                           healthCheckURL.String(),
 				Interval:                       "5s",
 				Timeout:                        "3s",
 				DeregisterCriticalServiceAfter: "5s",

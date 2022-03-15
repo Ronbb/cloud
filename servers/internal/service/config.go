@@ -41,7 +41,7 @@ func (s *service) initConfig() error {
 	}
 
 	if s.config.HTTP.Name == "" {
-		s.config.HTTP.Name = s.config.Name + "_http"
+		s.config.HTTP.Name = s.config.Name
 	}
 
 	return nil
