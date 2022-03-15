@@ -3,6 +3,7 @@
     "extendee",
     "hashicorp",
     "Idxs",
+    "LTRB",
     "protobuf",
     "protoimpl",
     "ronbb"
