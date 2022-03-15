@@ -35,7 +35,7 @@ func (s *service) registerServerToDataCenter() (*consul.Client, error) {
 			Address: hostName,
 			Port:    s.config.HTTP.Port,
 			Meta: map[string]string{
-				grpcAddressLabel: address(s.config.GRPC.Port),
+				GRPCAddressLabel: address(s.config.GRPC.Port),
 			},
 			Check: &consul.AgentServiceCheck{
 				HTTP:                           healthCheckURL.String(),

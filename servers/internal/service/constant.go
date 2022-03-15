@@ -1,5 +1,5 @@
 package service
 
 const (
-	grpcAddressLabel = "__GRPC_ADDRESS__"
+	GRPCAddressLabel = "__GRPC_ADDRESS__"
 )
