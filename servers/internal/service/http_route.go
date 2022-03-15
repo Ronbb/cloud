@@ -37,6 +37,7 @@ func init() {
 }
 
 func (s *service) registerHTTPFromGRPC() {
+	name := s.config.Name
 	ptr := reflect.ValueOf(s.server)
 	if ptr.Kind() != reflect.Ptr {
 		return
@@ -66,7 +67,7 @@ method_loop:
 			}
 		}
 
-		s.httpServer.Any("/"+method.Name, func(c echo.Context) error {
+		s.httpServer.Any("/"+name+"/"+method.Name, func(c echo.Context) error {
 			req := reflect.New(funType.In(1).Elem())
 
 			err := c.Bind(req.Interface())
