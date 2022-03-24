@@ -1,0 +1,73 @@
+// Authentication
+syntax = "proto3";
+
+option go_package = "github.com/ronbb/servers/models";
+
+// test
+message TestAllType {
+  // test
+  bool bool = 1;
+  // test
+  bytes bytes = 2;
+  // test
+  double double = 3;
+  // test
+  fixed32 fixed32 = 4;
+  // test
+  fixed64 fixed64 = 5;
+  // test
+  float float = 6;
+  // test
+  int32 int32 = 7;
+  // test
+  int64 int64 = 8;
+  // test
+  map<bool, string> map_bool_string = 9;
+  // test
+  sint32 sint32 = 10;
+  // test
+  sint64 sint64 = 11;
+  // test
+  sfixed32 sfixed32 = 12;
+  // test
+  sfixed64 sfixed64 = 13;
+  // test
+  string string = 14;
+  // test
+  uint32 uint32 = 15;
+  // test
+  uint64 uint64 = 16;
+  // test
+  repeated double repeated_doubles = 17;
+  // test
+  Message message = 18;
+  // test
+  Enum enum = 19;
+  // test
+  oneof oneof_value {
+    // test
+    int32 oneof_int32 = 20;
+    // test
+    int64 oneof_int64 = 21;
+    // test
+    string oneof_string = 22;
+  }
+
+  // test
+  message Message {
+    // test
+    string string = 1;
+    // test
+    uint32 uint32 = 2;
+  }
+
+  // test
+  enum Enum {
+    // test
+    ENUM_UNSPECIFIED = 0;
+    // test
+    ENUM_1 = 1;
+    // test
+    ENUM_2 = 2;
+  }
+}

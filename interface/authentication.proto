@@ -3,15 +3,17 @@ syntax = "proto3";
 
 option go_package = "github.com/ronbb/servers/models";
 
-// Authentication grpc
+// authentication grpc
 service Authentication {
   // login
   rpc Login(LoginRequest) returns (LoginResponse);
+  // create user
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
   // heart beat
   rpc KeepAlive(stream HeartBeat) returns (stream HeartBeat);
 }
 
-// Login request
+// login request
 message LoginRequest {
   // login user name
   string user_name = 1;
@@ -19,13 +21,40 @@ message LoginRequest {
   string password = 2;
 }
 
-// Login response
+// login response
 message LoginResponse {
   // access token
   string token = 1;
 }
 
+// create user request
+message CreateUserRequest {
+  // user
+  User user = 1;
+  // password
+  string password = 2;
+}
+
+// create user response
+message CreateUserResponse {
+  // empty
+}
+
 // HeartBeat
 message HeartBeat {
   // empty
+}
+
+// user
+message User {
+  // user name
+  string user_name = 1;
+}
+
+// user
+message Password {
+  // user name
+  string user_name = 1;
+  // password
+  string password = 2;
 }

@@ -1,12 +1,20 @@
 {
   "cSpell.words": [
+    "bson",
+    "bsoncodec",
+    "bsonrw",
     "extendee",
     "hashicorp",
     "Idxs",
     "LTRB",
+    "Nilf",
+    "oneof",
     "protobuf",
     "protoimpl",
     "ronbb",
+    "sfixed",
+    "sint",
+    "stretchr",
     "Upgrader"
   ]
 }

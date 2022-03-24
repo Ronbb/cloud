@@ -2,27 +2,129 @@ package main
 
 import (
 	"context"
-	"log"
 	"time"
 
-	"github.com/ronbb/servers/internal/service"
+	"github.com/ronbb/servers/internal/database"
+	"github.com/ronbb/servers/internal/token"
 	"github.com/ronbb/servers/models"
+	"go.mongodb.org/mongo-driver/mongo"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
-var AuthenticationServerDescription = &models.Authentication_ServiceDesc
+var AuthenticationServerDescription *grpc.ServiceDesc
+
+func init() {
+	AuthenticationServerDescription = &models.Authentication_ServiceDesc
+}
 
 type AuthenticationServer struct {
 	models.UnimplementedAuthenticationServer
+	UsersCollection     string
+	PasswordsCollection string
 }
 
 func NewAuthenticationServer() models.AuthenticationServer {
-	return &AuthenticationServer{}
+	return &AuthenticationServer{
+		UsersCollection:     database.UsersCollection,
+		PasswordsCollection: database.PasswordsCollection,
+	}
 }
 
 func (a *AuthenticationServer) Login(ctx context.Context, request *models.LoginRequest) (*models.LoginResponse, error) {
+	userName := request.GetUserName()
+	password := request.GetPassword()
+
+	passwords := db.Collection(a.PasswordsCollection)
+	result := passwords.FindOne(ctx, database.Filter(&models.Password{
+		UserName: userName,
+		Password: password,
+	}))
+
+	err := result.Err()
+	if err != nil && err != mongo.ErrNoDocuments {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if err == mongo.ErrNoDocuments {
+		return nil, status.Error(codes.Unauthenticated, "error.login.failed")
+	}
+
+	token, err := token.Create(token.Claims{
+		IssuedAt: time.Now().Unix(),
+		Audience: userName,
+		Issuer:   AuthenticationServerDescription.ServiceName,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return &models.LoginResponse{
-		Token: "token",
+		Token: token,
 	}, nil
+}
+
+func (a *AuthenticationServer) CreateUser(ctx context.Context, request *models.CreateUserRequest) (*models.CreateUserResponse, error) {
+	users := db.Collection(a.UsersCollection)
+	passwords := db.Collection(a.PasswordsCollection)
+
+	user := request.GetUser()
+	userName := user.GetUserName()
+	password := request.GetPassword()
+
+	err := db.Client().UseSession(ctx, func(session mongo.SessionContext) error {
+		result := users.FindOne(ctx, database.Filter(&models.User{
+			UserName: userName,
+		}))
+
+		// user should not exist when creating
+		err := result.Err()
+		if err == nil {
+			return status.Error(codes.InvalidArgument, "error.user.exists")
+		}
+
+		if err != mongo.ErrNoDocuments {
+			return status.Error(codes.Internal, err.Error())
+		}
+
+		// insert user
+		_, err = users.InsertOne(ctx, user)
+		if err != nil {
+			return status.Error(codes.Internal, err.Error())
+		}
+
+		_, err = passwords.DeleteMany(
+			ctx,
+			&models.Password{
+				UserName: userName,
+			},
+		)
+
+		if err != nil {
+			return status.Error(codes.Internal, err.Error())
+		}
+
+		// insert password
+		_, err = passwords.InsertOne(
+			ctx,
+			&models.Password{
+				UserName: userName,
+				Password: password,
+			},
+		)
+
+		if err != nil {
+			return status.Error(codes.Internal, err.Error())
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.CreateUserResponse{}, nil
 }
 
 func (a *AuthenticationServer) KeepAlive(stream models.Authentication_KeepAliveServer) error {
@@ -54,28 +156,5 @@ func (a *AuthenticationServer) KeepAlive(stream models.Authentication_KeepAliveS
 				return err
 			}
 		}
-	}
-}
-
-func main() {
-	s, err := service.Create(
-		NewAuthenticationServer(),
-		AuthenticationServerDescription,
-		&service.Config{
-			HTTP: &service.HTTPConfig{
-				Port: 5751,
-			},
-			GRPC: &service.GRPCConfig{
-				Port: 5752,
-			},
-		},
-	)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	err = s.Start()
-	if err != nil {
-		log.Fatal(err.Error())
 	}
 }

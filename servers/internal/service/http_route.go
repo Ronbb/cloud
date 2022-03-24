@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/ronbb/servers/internal/utils"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -54,7 +55,13 @@ func (s *service) registerHTTPFromGRPC() {
 
 			returnError := returns[grpcMethodOutErrorIndex]
 			if !returnError.IsNil() {
-				return returnError.Interface().(error)
+				err = returnError.Interface().(error)
+				status := status.Convert(err)
+
+				return c.String(
+					convertGRPCStatusToHTTPStatus(status.Code()),
+					status.Message(),
+				)
 			}
 
 			response := returns[grpcMethodOutResponseIndex]
@@ -78,6 +85,7 @@ func (s *service) registerHTTPFromGRPC() {
 }
 
 func (s *service) registerHTTPMiddlerware() {
+	s.httpServer.JSONSerializer = &JSONSerializer{}
 	s.httpServer.Use(middleware.Recover())
 	prometheus.NewPrometheus(
 		s.config.HTTP.Name,

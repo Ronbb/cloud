@@ -24,6 +24,8 @@ const _ = grpc.SupportPackageIsVersion7
 type AuthenticationClient interface {
 	// login
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	// create user
+	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
 	// heart beat
 	KeepAlive(ctx context.Context, opts ...grpc.CallOption) (Authentication_KeepAliveClient, error)
 }
@@ -39,6 +41,15 @@ func NewAuthenticationClient(cc grpc.ClientConnInterface) AuthenticationClient {
 func (c *authenticationClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
 	out := new(LoginResponse)
 	err := c.cc.Invoke(ctx, "/Authentication/Login", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authenticationClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
+	out := new(CreateUserResponse)
+	err := c.cc.Invoke(ctx, "/Authentication/CreateUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -82,6 +93,8 @@ func (x *authenticationKeepAliveClient) Recv() (*HeartBeat, error) {
 type AuthenticationServer interface {
 	// login
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	// create user
+	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	// heart beat
 	KeepAlive(Authentication_KeepAliveServer) error
 	mustEmbedUnimplementedAuthenticationServer()
@@ -93,6 +106,9 @@ type UnimplementedAuthenticationServer struct {
 
 func (UnimplementedAuthenticationServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedAuthenticationServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
 }
 func (UnimplementedAuthenticationServer) KeepAlive(Authentication_KeepAliveServer) error {
 	return status.Errorf(codes.Unimplemented, "method KeepAlive not implemented")
@@ -124,6 +140,24 @@ func _Authentication_Login_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthenticationServer).Login(ctx, req.(*LoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Authentication_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthenticationServer).CreateUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Authentication/CreateUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthenticationServer).CreateUser(ctx, req.(*CreateUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -164,6 +198,10 @@ var Authentication_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Login",
 			Handler:    _Authentication_Login_Handler,
+		},
+		{
+			MethodName: "CreateUser",
+			Handler:    _Authentication_CreateUser_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
