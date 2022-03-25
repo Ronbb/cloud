@@ -3,8 +3,8 @@ package database_test
 import (
 	"testing"
 
-	"github.com/ronbb/servers/internal/database"
-	"github.com/ronbb/servers/models"
+	"github.com/ronbb/cloud/servers/internal/database"
+	"github.com/ronbb/cloud/servers/models"
 	"github.com/stretchr/testify/assert"
 )
 

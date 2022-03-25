@@ -7,9 +7,17 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/bsoncodec"
 	"go.mongodb.org/mongo-driver/bson/bsonrw"
+	"go.mongodb.org/mongo-driver/bson/bsontype"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/protobuf/encoding/prototext"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
+)
+
+const (
+	fieldIdProtoName = "id"
+	fieldIdBsonName  = "_id"
+	fieldIdKind      = protoreflect.StringKind
 )
 
 type Codec struct{}
@@ -35,6 +43,11 @@ func (c *Codec) decodeMessage(
 		key, valueReader, err := documentReader.ReadElement()
 		if err != nil {
 			break
+		}
+
+		if c.isBsonFieldId(key, fields) {
+			c.decodeId(context, valueReader, messageValue)
+			continue
 		}
 
 		field := fields.ByJSONName(key)
@@ -97,6 +110,55 @@ func (c *Codec) decodeMessage(
 	return nil
 }
 
+func (c *Codec) isBsonFieldId(key string, fields protoreflect.FieldDescriptors) bool {
+	// check name
+	if key != fieldIdBsonName {
+		return false
+	}
+
+	// check if field exists
+	field := fields.ByName(fieldIdProtoName)
+	if field == nil {
+		return false
+	}
+
+	// check if type matches
+	if field.Kind() != fieldIdKind {
+		return false
+	}
+
+	return true
+}
+
+func (c *Codec) decodeId(
+	context bsoncodec.DecodeContext,
+	valueReader bsonrw.ValueReader,
+	messageValue protoreflect.Message,
+) error {
+	var value string
+	switch valueReader.Type() {
+	case bsontype.ObjectID:
+		id, err := valueReader.ReadObjectID()
+		if err != nil {
+			return err
+		}
+		value = id.Hex()
+	case bsontype.String:
+		id, err := valueReader.ReadString()
+		if err != nil {
+			return err
+		}
+		value = id
+	}
+
+	messageValue.Set(
+		messageValue.Descriptor().Fields().ByName(fieldIdProtoName),
+		protoreflect.ValueOfString(value),
+	)
+
+	return nil
+}
+
 func (c *Codec) decodeMap(
 	context bsoncodec.DecodeContext,
 	documentReader bsonrw.DocumentReader,
@@ -110,7 +172,6 @@ func (c *Codec) decodeMap(
 			break
 		}
 
-		// TODO
 		mapKeyValue, err := c.decodeBaseFromString(context, key, keyKind)
 		if err != nil {
 			continue
@@ -381,6 +442,16 @@ func (c *Codec) encodeMessage(
 		}
 		kind := field.Kind()
 		fieldValue := messageValue.Get(field)
+
+		if c.isProtoFieldId(field) {
+			valueWriter, err := documentWriter.WriteDocumentElement(fieldIdBsonName)
+			if err != nil {
+				continue
+			}
+			c.encodeId(context, valueWriter, fieldValue)
+			continue
+		}
+
 		valueWriter, err := documentWriter.WriteDocumentElement(field.JSONName())
 		if err != nil {
 			continue
@@ -438,6 +509,33 @@ func (c *Codec) encodeMessage(
 	}
 
 	return nil
+}
+
+func (c *Codec) isProtoFieldId(field protoreflect.FieldDescriptor) bool {
+	// check name
+	if field.Name() != fieldIdProtoName {
+		return false
+	}
+
+	// check if type matches
+	if field.Kind() != fieldIdKind {
+		return false
+	}
+
+	return true
+}
+
+func (c *Codec) encodeId(
+	context bsoncodec.EncodeContext,
+	valueWriter bsonrw.ValueWriter,
+	value protoreflect.Value,
+) error {
+	id, err := primitive.ObjectIDFromHex(value.String())
+	if err != nil {
+		return valueWriter.WriteString(value.String())
+	}
+
+	return valueWriter.WriteObjectID(id)
 }
 
 func (c *Codec) encodeValueToString(

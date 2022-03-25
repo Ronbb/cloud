@@ -3,7 +3,7 @@ package database
 import (
 	"testing"
 
-	"github.com/ronbb/servers/models"
+	"github.com/ronbb/cloud/servers/models"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -33,6 +33,7 @@ func TestCodec(t *testing.T) {
 		Message:         &models.TestAllType_Message{String_: "string2", Uint32: 99},
 		Enum:            models.TestAllType_ENUM_2,
 		OneofValue:      &models.TestAllType_OneofString{OneofString: "OneofString"},
+		Id:              "id",
 	}
 	bytes, err := bson.MarshalWithRegistry(registry, message)
 	assert.Nil(err)
@@ -41,6 +42,8 @@ func TestCodec(t *testing.T) {
 	jsonMap := map[string]interface{}{}
 	err = bson.Unmarshal(bytes, &jsonMap)
 	assert.Nil(err)
+	assert.NotNil(jsonMap)
+	assert.NotNil(jsonMap["_id"])
 
 	clonedMessage := &models.TestAllType{}
 	err = bson.UnmarshalWithRegistry(registry, bytes, clonedMessage)
