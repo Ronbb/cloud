@@ -14,6 +14,7 @@ const (
 	Address             = "mongodb://localhost:27017"
 	UsersCollection     = "Users"
 	PasswordsCollection = "Passwords"
+	BlogsCollection     = "Blogs"
 )
 
 var protoType = reflect.TypeOf((*proto.Message)(nil)).Elem()

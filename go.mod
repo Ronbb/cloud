@@ -1,4 +1,4 @@
-module github.com/ronbb/servers
+module github.com/ronbb/cloud
 
 go 1.17
 

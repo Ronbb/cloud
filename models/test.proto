@@ -1,7 +1,7 @@
 // Authentication
 syntax = "proto3";
 
-option go_package = "github.com/ronbb/servers/models";
+option go_package = "github.com/ronbb/cloud/models";
 
 // test
 message TestAllType {
@@ -52,6 +52,8 @@ message TestAllType {
     // test
     string oneof_string = 22;
   }
+  // id => _id
+  string id = 23;
 
   // test
   message Message {

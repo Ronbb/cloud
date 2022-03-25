@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	consul "github.com/hashicorp/consul/api"
-	internal_service "github.com/ronbb/servers/internal/service"
-	"github.com/ronbb/servers/models"
+	internal_service "github.com/ronbb/cloud/servers/internal/service"
+	"github.com/ronbb/cloud/servers/models"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

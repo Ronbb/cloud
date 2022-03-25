@@ -1,7 +1,9 @@
 // Authentication
 syntax = "proto3";
 
-option go_package = "github.com/ronbb/servers/models";
+package authentication;
+
+option go_package = "github.com/ronbb/cloud/models";
 
 // authentication grpc
 service Authentication {

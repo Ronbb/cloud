@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ronbb/servers/models"
+	"github.com/ronbb/cloud/servers/models"
 	"github.com/stretchr/testify/assert"
 )
 

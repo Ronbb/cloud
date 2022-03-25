@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/ronbb/servers/internal/database"
-	"github.com/ronbb/servers/internal/service"
+	"github.com/ronbb/cloud/servers/internal/database"
+	"github.com/ronbb/cloud/servers/internal/service"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

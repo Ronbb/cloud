@@ -1,0 +1,64 @@
+// Blog
+syntax = "proto3";
+
+package blog;
+
+import "models/api.proto";
+
+option go_package = "github.com/ronbb/cloud/models";
+
+// blog server
+service Blog {
+  option (api.server) = {
+    name : "blog",
+  };
+
+  // create article
+  rpc CreateArticle(CreateArticleRequest) returns (CreateArticleResponse) {
+    option (api.route) = {
+      method : "post",
+      url : "/article",
+    };
+  }
+}
+
+// article
+message Article {
+  // id
+  string id = 1;
+  // title
+  string title = 2;
+  // raw content
+  // must be markdown
+  string content = 3;
+  // author
+  string author_id = 4;
+  // keys
+  repeated string keys = 5;
+}
+
+// create a article
+message CreateArticleRequest {
+  // title
+  string title = 1;
+  // author
+  string author_id = 2;
+}
+
+// create a article
+message CreateArticleResponse {
+  // id
+  string id = 1;
+}
+
+// get a article
+message GetArticleRequest {
+  // id
+  string id = 1;
+}
+
+// create a article
+message GetArticleResponse {
+  // article
+  Article article = 1;
+}

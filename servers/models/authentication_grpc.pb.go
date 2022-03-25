@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.12.4
-// source: authentication.proto
+// source: models/authentication.proto
 
 package models
 
@@ -40,7 +40,7 @@ func NewAuthenticationClient(cc grpc.ClientConnInterface) AuthenticationClient {
 
 func (c *authenticationClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
 	out := new(LoginResponse)
-	err := c.cc.Invoke(ctx, "/Authentication/Login", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/authentication.Authentication/Login", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (c *authenticationClient) Login(ctx context.Context, in *LoginRequest, opts
 
 func (c *authenticationClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
 	out := new(CreateUserResponse)
-	err := c.cc.Invoke(ctx, "/Authentication/CreateUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/authentication.Authentication/CreateUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (c *authenticationClient) CreateUser(ctx context.Context, in *CreateUserReq
 }
 
 func (c *authenticationClient) KeepAlive(ctx context.Context, opts ...grpc.CallOption) (Authentication_KeepAliveClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Authentication_ServiceDesc.Streams[0], "/Authentication/KeepAlive", opts...)
+	stream, err := c.cc.NewStream(ctx, &Authentication_ServiceDesc.Streams[0], "/authentication.Authentication/KeepAlive", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func _Authentication_Login_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Authentication/Login",
+		FullMethod: "/authentication.Authentication/Login",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthenticationServer).Login(ctx, req.(*LoginRequest))
@@ -154,7 +154,7 @@ func _Authentication_CreateUser_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Authentication/CreateUser",
+		FullMethod: "/authentication.Authentication/CreateUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthenticationServer).CreateUser(ctx, req.(*CreateUserRequest))
@@ -192,7 +192,7 @@ func (x *authenticationKeepAliveServer) Recv() (*HeartBeat, error) {
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Authentication_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Authentication",
+	ServiceName: "authentication.Authentication",
 	HandlerType: (*AuthenticationServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -212,5 +212,5 @@ var Authentication_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "authentication.proto",
+	Metadata: "models/authentication.proto",
 }

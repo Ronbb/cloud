@@ -1,0 +1,34 @@
+// api
+syntax = "proto3";
+
+package api;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "github.com/ronbb/cloud/models";
+
+// .
+extend google.protobuf.MethodOptions {
+  // .
+  Route route = 3000;
+}
+
+// .
+extend google.protobuf.ServiceOptions {
+  // .
+  Server server = 3001;
+}
+
+// .
+message Route {
+  //
+  string method = 1;
+  //
+  string url = 2;
+}
+
+// .
+message Server {
+  //
+  string name = 1;
+}

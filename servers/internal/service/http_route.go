@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/ronbb/servers/internal/utils"
+	"github.com/ronbb/cloud/servers/internal/utils"
 	"google.golang.org/grpc/status"
 )
 
@@ -36,11 +36,43 @@ func (s *service) registerHTTPFromGRPC() {
 		return "/" + name + "/" + utils.ToSnakeCase(api)
 	}
 
+	extractMethod := func(api string) (method, restPath string) {
+		method = http.MethodPost
+		separator := "_"
+		splitted := strings.Split(path(api), separator)
+		if len(splitted) < 2 {
+			restPath = strings.Join(splitted, separator)
+			return
+		}
+
+		methodRaw := splitted[0]
+		restPath = strings.Join(splitted[1:], separator)
+
+		switch methodRaw {
+		case "create":
+		case "add":
+			method = http.MethodPost
+		case "update":
+		case "modify":
+			method = http.MethodPut
+		case "remove":
+		case "delete":
+			method = http.MethodDelete
+		case "query":
+		case "get":
+			method = http.MethodGet
+		}
+
+		return
+	}
+
 	for _, description := range methodDescriptions {
 		name := description.MethodName
 		method := server.MethodByName(name)
 
-		s.httpServer.Any(path(name), func(c echo.Context) error {
+		httpMethod, path := extractMethod(name)
+
+		s.httpServer.Add(httpMethod, path, func(c echo.Context) error {
 			request := reflect.New(method.Type().In(grpcMethodInRequestIndex).Elem())
 
 			err := c.Bind(request.Interface())
