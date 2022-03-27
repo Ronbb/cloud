@@ -8,6 +8,7 @@ import (
 	consul "github.com/hashicorp/consul/api"
 	"github.com/labstack/echo/v4"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/ronbb/cloud/servers/models"
 	"google.golang.org/grpc"
 )
 
@@ -17,23 +18,30 @@ type (
 	}
 
 	service struct {
-		config          *Config
-		registry        *prometheus.Registry
-		server          interface{}
-		grpcDescription *grpc.ServiceDesc
-		grpcServer      *grpc.Server
-		grpcMetrics     *grpc_prometheus.ServerMetrics
-		grpcCounter     *prometheus.CounterVec
-		httpServer      *echo.Echo
-		registerClient  *consul.Client
+		config         *Config
+		registry       *prometheus.Registry
+		server         interface{}
+		grpcDescriptor *grpc.ServiceDesc
+		grpcServer     *grpc.Server
+		grpcMetrics    *grpc_prometheus.ServerMetrics
+		grpcCounter    *prometheus.CounterVec
+		httpDescriptor *models.HttpServerDescriptor
+		httpServer     *echo.Echo
+		registerClient *consul.Client
 	}
 )
 
-func Create(server interface{}, description *grpc.ServiceDesc, config *Config) (Service, error) {
+func Create(
+	server interface{},
+	grpcDescriptor *grpc.ServiceDesc,
+	httpDescriptor *models.HttpServerDescriptor,
+	config *Config,
+) (Service, error) {
 	s := &service{
-		server:          server,
-		grpcDescription: description,
-		config:          config,
+		server:         server,
+		grpcDescriptor: grpcDescriptor,
+		httpDescriptor: httpDescriptor,
+		config:         config,
 	}
 
 	err := s.initConfig()
@@ -69,7 +77,7 @@ func Create(server interface{}, description *grpc.ServiceDesc, config *Config) (
 	s.grpcServer = grpcServer
 
 	// Register your gRPC service implementations.
-	grpcServer.RegisterService(description, server)
+	grpcServer.RegisterService(grpcDescriptor, server)
 
 	// After all your registrations, make sure all of the Prometheus metrics are initialized.
 	grpc_prometheus.Register(grpcServer)

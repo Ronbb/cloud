@@ -13,10 +13,14 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-var AuthenticationServerDescription *grpc.ServiceDesc
+var (
+	AuthenticationGRPCServerDescriptor *grpc.ServiceDesc
+	AuthenticationHTTPServerDescriptor *models.HttpServerDescriptor
+)
 
 func init() {
-	AuthenticationServerDescription = &models.Authentication_ServiceDesc
+	AuthenticationGRPCServerDescriptor = &models.Authentication_ServiceDesc
+	AuthenticationHTTPServerDescriptor = models.AuthenticationHttpServerDescriptor
 }
 
 type AuthenticationServer struct {
@@ -54,7 +58,7 @@ func (a *AuthenticationServer) Login(ctx context.Context, request *models.LoginR
 	token, err := token.Create(token.Claims{
 		IssuedAt: time.Now().Unix(),
 		Audience: userName,
-		Issuer:   AuthenticationServerDescription.ServiceName,
+		Issuer:   AuthenticationGRPCServerDescriptor.ServiceName,
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())

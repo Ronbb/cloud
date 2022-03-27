@@ -25,7 +25,7 @@ type (
 )
 
 func (s *service) initConfig() error {
-	if s.config == nil || s.server == nil || s.grpcDescription == nil {
+	if s.config == nil || s.server == nil || s.grpcDescriptor == nil {
 		return errors.New("service config/server/description should not be nil")
 	}
 
@@ -34,7 +34,11 @@ func (s *service) initConfig() error {
 	}
 
 	if s.config.Name == "" {
-		s.config.Name = casing.Snake(s.grpcDescription.ServiceName)
+		if s.httpDescriptor.Name != "" {
+			s.config.Name = casing.Snake(s.httpDescriptor.Name)
+		} else {
+			s.config.Name = casing.Snake(s.grpcDescriptor.ServiceName)
+		}
 	}
 
 	if s.config.GRPC.Name == "" {

@@ -16,13 +16,14 @@ func init() {
 		log.Fatal(err)
 	}
 
-	db = client.Database(AuthenticationServerDescription.ServiceName)
+	db = client.Database(AuthenticationGRPCServerDescriptor.ServiceName)
 }
 
 func main() {
 	s, err := service.Create(
 		NewAuthenticationServer(),
-		AuthenticationServerDescription,
+		AuthenticationGRPCServerDescriptor,
+		AuthenticationHTTPServerDescriptor,
 		&service.Config{
 			HTTP: &service.HTTPConfig{
 				Port: 5751,
