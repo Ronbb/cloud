@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 
-	"github.com/ronbb/cloud/utils"
+	"github.com/ronbb/cloud/utils/casing"
 )
 
 type (
@@ -34,7 +34,7 @@ func (s *service) initConfig() error {
 	}
 
 	if s.config.Name == "" {
-		s.config.Name = utils.ToSnakeCase(s.grpcDescription.ServiceName)
+		s.config.Name = casing.Snake(s.grpcDescription.ServiceName)
 	}
 
 	if s.config.GRPC.Name == "" {

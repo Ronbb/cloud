@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/ronbb/cloud/utils"
+	"github.com/ronbb/cloud/utils/casing"
 	"google.golang.org/grpc/status"
 )
 
@@ -33,7 +33,7 @@ func (s *service) registerHTTPFromGRPC() {
 	streamDescriptions := description.Streams
 
 	path := func(api string) string {
-		return "/" + name + "/" + utils.ToSnakeCase(api)
+		return "/" + name + "/" + casing.Snake(api)
 	}
 
 	extractMethod := func(api string) (method, restPath string) {

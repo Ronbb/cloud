@@ -4,7 +4,7 @@ import (
 	"text/template"
 
 	"github.com/ronbb/cloud/servers/models"
-	"github.com/ronbb/cloud/utils"
+	"github.com/ronbb/cloud/utils/casing"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 )
@@ -15,7 +15,7 @@ func ServerOptions(service *protogen.Service) *models.ServerOptions {
 		return options
 	} else {
 		return &models.ServerOptions{
-			Name: utils.ToSnakeCase(service.GoName),
+			Name: casing.Snake(service.GoName),
 		}
 	}
 }
@@ -27,7 +27,7 @@ func MethodOptions(method *protogen.Method) *models.RouteOptions {
 	} else {
 		return &models.RouteOptions{
 			Method: "post",
-			Url:    "/" + utils.ToSnakeCase(method.GoName),
+			Url:    "/" + casing.Snake(method.GoName),
 		}
 	}
 }
