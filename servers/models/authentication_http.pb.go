@@ -16,7 +16,7 @@ var AuthenticationHttpServerDescriptor = &HttpServerDescriptor{
 
 		{
 			GrpcMethod:  "CreateUser",
-			Url:         "/create_user",
+			Url:         "/user",
 			Method:      "post",
 			IsWebSocket: false,
 		},
@@ -24,7 +24,7 @@ var AuthenticationHttpServerDescriptor = &HttpServerDescriptor{
 		{
 			GrpcMethod:  "KeepAlive",
 			Url:         "/keep_alive",
-			Method:      "post",
+			Method:      "",
 			IsWebSocket: true,
 		},
 	},

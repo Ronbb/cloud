@@ -78,10 +78,11 @@ final $typed_data.Uint8List passwordDescriptor = $convert.base64Decode('CghQYXNz
 const $core.Map<$core.String, $core.dynamic> AuthenticationServiceBase$json = const {
   '1': 'Authentication',
   '2': const [
-    const {'1': 'Login', '2': '.authentication.LoginRequest', '3': '.authentication.LoginResponse'},
-    const {'1': 'CreateUser', '2': '.authentication.CreateUserRequest', '3': '.authentication.CreateUserResponse'},
-    const {'1': 'KeepAlive', '2': '.authentication.HeartBeat', '3': '.authentication.HeartBeat', '5': true, '6': true},
+    const {'1': 'Login', '2': '.authentication.LoginRequest', '3': '.authentication.LoginResponse', '4': const {}},
+    const {'1': 'CreateUser', '2': '.authentication.CreateUserRequest', '3': '.authentication.CreateUserResponse', '4': const {}},
+    const {'1': 'KeepAlive', '2': '.authentication.HeartBeat', '3': '.authentication.HeartBeat', '4': const {}, '5': true, '6': true},
   ],
+  '3': const {},
 };
 
 @$core.Deprecated('Use authenticationServiceDescriptor instead')
@@ -95,4 +96,4 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> Authentica
 };
 
 /// Descriptor for `Authentication`. Decode as a `google.protobuf.ServiceDescriptorProto`.
-final $typed_data.Uint8List authenticationServiceDescriptor = $convert.base64Decode('Cg5BdXRoZW50aWNhdGlvbhJECgVMb2dpbhIcLmF1dGhlbnRpY2F0aW9uLkxvZ2luUmVxdWVzdBodLmF1dGhlbnRpY2F0aW9uLkxvZ2luUmVzcG9uc2USUwoKQ3JlYXRlVXNlchIhLmF1dGhlbnRpY2F0aW9uLkNyZWF0ZVVzZXJSZXF1ZXN0GiIuYXV0aGVudGljYXRpb24uQ3JlYXRlVXNlclJlc3BvbnNlEkUKCUtlZXBBbGl2ZRIZLmF1dGhlbnRpY2F0aW9uLkhlYXJ0QmVhdBoZLmF1dGhlbnRpY2F0aW9uLkhlYXJ0QmVhdCgBMAE=');
+final $typed_data.Uint8List authenticationServiceDescriptor = $convert.base64Decode('Cg5BdXRoZW50aWNhdGlvbhJYCgVMb2dpbhIcLmF1dGhlbnRpY2F0aW9uLkxvZ2luUmVxdWVzdBodLmF1dGhlbnRpY2F0aW9uLkxvZ2luUmVzcG9uc2UiEsK7AQ4KBHBvc3QSBi9sb2dpbhJmCgpDcmVhdGVVc2VyEiEuYXV0aGVudGljYXRpb24uQ3JlYXRlVXNlclJlcXVlc3QaIi5hdXRoZW50aWNhdGlvbi5DcmVhdGVVc2VyUmVzcG9uc2UiEcK7AQ0KBHBvc3QSBS91c2VyElgKCUtlZXBBbGl2ZRIZLmF1dGhlbnRpY2F0aW9uLkhlYXJ0QmVhdBoZLmF1dGhlbnRpY2F0aW9uLkhlYXJ0QmVhdCIRwrsBDRILL2tlZXBfYWxpdmUoATABGhTCuwEQCg5hdXRoZW50aWNhdGlvbg==');

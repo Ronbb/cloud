@@ -3,16 +3,35 @@ syntax = "proto3";
 
 package authentication;
 
+import "models/api.proto";
+
 option go_package = "github.com/ronbb/cloud/models";
 
 // authentication grpc
 service Authentication {
+  option (api.server) = {
+    name : "authentication",
+  };
   // login
-  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Login(LoginRequest) returns (LoginResponse) {
+    option (api.route) = {
+      method : "post",
+      url : "/login",
+    };
+  }
   // create user
-  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
+    option (api.route) = {
+      method : "post",
+      url : "/user",
+    };
+  }
   // heart beat
-  rpc KeepAlive(stream HeartBeat) returns (stream HeartBeat);
+  rpc KeepAlive(stream HeartBeat) returns (stream HeartBeat) {
+    option (api.route) = {
+      url : "/keep_alive",
+    };
+  }
 }
 
 // login request
