@@ -23,20 +23,20 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// .
-type Route struct {
+// route option
+type RouteOptions struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	//
+	// method
 	Method string `protobuf:"bytes,1,opt,name=method,proto3" json:"method,omitempty"`
-	//
+	// url
 	Url string `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
 }
 
-func (x *Route) Reset() {
-	*x = Route{}
+func (x *RouteOptions) Reset() {
+	*x = RouteOptions{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_models_api_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -44,13 +44,13 @@ func (x *Route) Reset() {
 	}
 }
 
-func (x *Route) String() string {
+func (x *RouteOptions) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Route) ProtoMessage() {}
+func (*RouteOptions) ProtoMessage() {}
 
-func (x *Route) ProtoReflect() protoreflect.Message {
+func (x *RouteOptions) ProtoReflect() protoreflect.Message {
 	mi := &file_models_api_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -62,37 +62,37 @@ func (x *Route) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Route.ProtoReflect.Descriptor instead.
-func (*Route) Descriptor() ([]byte, []int) {
+// Deprecated: Use RouteOptions.ProtoReflect.Descriptor instead.
+func (*RouteOptions) Descriptor() ([]byte, []int) {
 	return file_models_api_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Route) GetMethod() string {
+func (x *RouteOptions) GetMethod() string {
 	if x != nil {
 		return x.Method
 	}
 	return ""
 }
 
-func (x *Route) GetUrl() string {
+func (x *RouteOptions) GetUrl() string {
 	if x != nil {
 		return x.Url
 	}
 	return ""
 }
 
-// .
-type Server struct {
+// server option
+type ServerOptions struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	//
+	// server name
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 }
 
-func (x *Server) Reset() {
-	*x = Server{}
+func (x *ServerOptions) Reset() {
+	*x = ServerOptions{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_models_api_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -100,13 +100,13 @@ func (x *Server) Reset() {
 	}
 }
 
-func (x *Server) String() string {
+func (x *ServerOptions) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Server) ProtoMessage() {}
+func (*ServerOptions) ProtoMessage() {}
 
-func (x *Server) ProtoReflect() protoreflect.Message {
+func (x *ServerOptions) ProtoReflect() protoreflect.Message {
 	mi := &file_models_api_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -118,22 +118,156 @@ func (x *Server) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Server.ProtoReflect.Descriptor instead.
-func (*Server) Descriptor() ([]byte, []int) {
+// Deprecated: Use ServerOptions.ProtoReflect.Descriptor instead.
+func (*ServerOptions) Descriptor() ([]byte, []int) {
 	return file_models_api_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *Server) GetName() string {
+func (x *ServerOptions) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
+// generated http server
+type HttpServerDescriptor struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// server name
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// routes
+	Routes []*RouteDescriptor `protobuf:"bytes,2,rep,name=routes,proto3" json:"routes,omitempty"`
+}
+
+func (x *HttpServerDescriptor) Reset() {
+	*x = HttpServerDescriptor{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_models_api_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *HttpServerDescriptor) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HttpServerDescriptor) ProtoMessage() {}
+
+func (x *HttpServerDescriptor) ProtoReflect() protoreflect.Message {
+	mi := &file_models_api_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HttpServerDescriptor.ProtoReflect.Descriptor instead.
+func (*HttpServerDescriptor) Descriptor() ([]byte, []int) {
+	return file_models_api_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *HttpServerDescriptor) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *HttpServerDescriptor) GetRoutes() []*RouteDescriptor {
+	if x != nil {
+		return x.Routes
+	}
+	return nil
+}
+
+// route
+type RouteDescriptor struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// grpc method name
+	GrpcMethod string `protobuf:"bytes,1,opt,name=grpc_method,json=grpcMethod,proto3" json:"grpc_method,omitempty"`
+	// url
+	Url string `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
+	// http method
+	Method string `protobuf:"bytes,3,opt,name=method,proto3" json:"method,omitempty"`
+	// is websocket
+	IsWebSocket bool `protobuf:"varint,4,opt,name=is_web_socket,json=isWebSocket,proto3" json:"is_web_socket,omitempty"`
+}
+
+func (x *RouteDescriptor) Reset() {
+	*x = RouteDescriptor{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_models_api_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RouteDescriptor) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RouteDescriptor) ProtoMessage() {}
+
+func (x *RouteDescriptor) ProtoReflect() protoreflect.Message {
+	mi := &file_models_api_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RouteDescriptor.ProtoReflect.Descriptor instead.
+func (*RouteDescriptor) Descriptor() ([]byte, []int) {
+	return file_models_api_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *RouteDescriptor) GetGrpcMethod() string {
+	if x != nil {
+		return x.GrpcMethod
+	}
+	return ""
+}
+
+func (x *RouteDescriptor) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+func (x *RouteDescriptor) GetMethod() string {
+	if x != nil {
+		return x.Method
+	}
+	return ""
+}
+
+func (x *RouteDescriptor) GetIsWebSocket() bool {
+	if x != nil {
+		return x.IsWebSocket
+	}
+	return false
+}
+
 var file_models_api_proto_extTypes = []protoimpl.ExtensionInfo{
 	{
 		ExtendedType:  (*descriptor.MethodOptions)(nil),
-		ExtensionType: (*Route)(nil),
+		ExtensionType: (*RouteOptions)(nil),
 		Field:         3000,
 		Name:          "api.route",
 		Tag:           "bytes,3000,opt,name=route",
@@ -141,27 +275,27 @@ var file_models_api_proto_extTypes = []protoimpl.ExtensionInfo{
 	},
 	{
 		ExtendedType:  (*descriptor.ServiceOptions)(nil),
-		ExtensionType: (*Server)(nil),
-		Field:         3001,
+		ExtensionType: (*ServerOptions)(nil),
+		Field:         3000,
 		Name:          "api.server",
-		Tag:           "bytes,3001,opt,name=server",
+		Tag:           "bytes,3000,opt,name=server",
 		Filename:      "models/api.proto",
 	},
 }
 
 // Extension fields to descriptor.MethodOptions.
 var (
-	// .
+	// route
 	//
-	// optional api.Route route = 3000;
+	// optional api.RouteOptions route = 3000;
 	E_Route = &file_models_api_proto_extTypes[0]
 )
 
 // Extension fields to descriptor.ServiceOptions.
 var (
-	// .
+	// server
 	//
-	// optional api.Server server = 3001;
+	// optional api.ServerOptions server = 3000;
 	E_Server = &file_models_api_proto_extTypes[1]
 )
 
@@ -171,23 +305,39 @@ var file_models_api_proto_rawDesc = []byte{
 	0x0a, 0x10, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x73, 0x2f, 0x61, 0x70, 0x69, 0x2e, 0x70, 0x72, 0x6f,
 	0x74, 0x6f, 0x12, 0x03, 0x61, 0x70, 0x69, 0x1a, 0x20, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f,
 	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70,
-	0x74, 0x6f, 0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x31, 0x0a, 0x05, 0x52, 0x6f, 0x75,
-	0x74, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x6d, 0x65, 0x74, 0x68, 0x6f, 0x64, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x06, 0x6d, 0x65, 0x74, 0x68, 0x6f, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72,
-	0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x22, 0x1c, 0x0a, 0x06,
-	0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x3a, 0x41, 0x0a, 0x05, 0x72, 0x6f,
-	0x75, 0x74, 0x65, 0x12, 0x1e, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x4d, 0x65, 0x74, 0x68, 0x6f, 0x64, 0x4f, 0x70, 0x74, 0x69,
-	0x6f, 0x6e, 0x73, 0x18, 0xb8, 0x17, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x61, 0x70, 0x69,
-	0x2e, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x52, 0x05, 0x72, 0x6f, 0x75, 0x74, 0x65, 0x3a, 0x45, 0x0a,
-	0x06, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x12, 0x1f, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65,
-	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63,
-	0x65, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0xb9, 0x17, 0x20, 0x01, 0x28, 0x0b, 0x32,
-	0x0b, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x06, 0x73, 0x65,
-	0x72, 0x76, 0x65, 0x72, 0x42, 0x1f, 0x5a, 0x1d, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63,
-	0x6f, 0x6d, 0x2f, 0x72, 0x6f, 0x6e, 0x62, 0x62, 0x2f, 0x63, 0x6c, 0x6f, 0x75, 0x64, 0x2f, 0x6d,
-	0x6f, 0x64, 0x65, 0x6c, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x74, 0x6f, 0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x38, 0x0a, 0x0c, 0x52, 0x6f, 0x75,
+	0x74, 0x65, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x16, 0x0a, 0x06, 0x6d, 0x65, 0x74,
+	0x68, 0x6f, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x6d, 0x65, 0x74, 0x68, 0x6f,
+	0x64, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03,
+	0x75, 0x72, 0x6c, 0x22, 0x23, 0x0a, 0x0d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x4f, 0x70, 0x74,
+	0x69, 0x6f, 0x6e, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0x58, 0x0a, 0x14, 0x48, 0x74, 0x74, 0x70,
+	0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x44, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x6f, 0x72,
+	0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
+	0x6e, 0x61, 0x6d, 0x65, 0x12, 0x2c, 0x0a, 0x06, 0x72, 0x6f, 0x75, 0x74, 0x65, 0x73, 0x18, 0x02,
+	0x20, 0x03, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x52, 0x6f, 0x75, 0x74, 0x65,
+	0x44, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x6f, 0x72, 0x52, 0x06, 0x72, 0x6f, 0x75, 0x74,
+	0x65, 0x73, 0x22, 0x80, 0x01, 0x0a, 0x0f, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x44, 0x65, 0x73, 0x63,
+	0x72, 0x69, 0x70, 0x74, 0x6f, 0x72, 0x12, 0x1f, 0x0a, 0x0b, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6d,
+	0x65, 0x74, 0x68, 0x6f, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x67, 0x72, 0x70,
+	0x63, 0x4d, 0x65, 0x74, 0x68, 0x6f, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x12, 0x16, 0x0a, 0x06, 0x6d, 0x65, 0x74,
+	0x68, 0x6f, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x6d, 0x65, 0x74, 0x68, 0x6f,
+	0x64, 0x12, 0x22, 0x0a, 0x0d, 0x69, 0x73, 0x5f, 0x77, 0x65, 0x62, 0x5f, 0x73, 0x6f, 0x63, 0x6b,
+	0x65, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0b, 0x69, 0x73, 0x57, 0x65, 0x62, 0x53,
+	0x6f, 0x63, 0x6b, 0x65, 0x74, 0x3a, 0x48, 0x0a, 0x05, 0x72, 0x6f, 0x75, 0x74, 0x65, 0x12, 0x1e,
+	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
+	0x2e, 0x4d, 0x65, 0x74, 0x68, 0x6f, 0x64, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0xb8,
+	0x17, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x52, 0x6f, 0x75, 0x74,
+	0x65, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x05, 0x72, 0x6f, 0x75, 0x74, 0x65, 0x3a,
+	0x4c, 0x0a, 0x06, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x12, 0x1f, 0x2e, 0x67, 0x6f, 0x6f, 0x67,
+	0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x53, 0x65, 0x72, 0x76,
+	0x69, 0x63, 0x65, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0xb8, 0x17, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x12, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x4f, 0x70,
+	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x06, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x42, 0x1f, 0x5a,
+	0x1d, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x72, 0x6f, 0x6e, 0x62,
+	0x62, 0x2f, 0x63, 0x6c, 0x6f, 0x75, 0x64, 0x2f, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x73, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -202,23 +352,26 @@ func file_models_api_proto_rawDescGZIP() []byte {
 	return file_models_api_proto_rawDescData
 }
 
-var file_models_api_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_models_api_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_models_api_proto_goTypes = []interface{}{
-	(*Route)(nil),                     // 0: api.Route
-	(*Server)(nil),                    // 1: api.Server
-	(*descriptor.MethodOptions)(nil),  // 2: google.protobuf.MethodOptions
-	(*descriptor.ServiceOptions)(nil), // 3: google.protobuf.ServiceOptions
+	(*RouteOptions)(nil),              // 0: api.RouteOptions
+	(*ServerOptions)(nil),             // 1: api.ServerOptions
+	(*HttpServerDescriptor)(nil),      // 2: api.HttpServerDescriptor
+	(*RouteDescriptor)(nil),           // 3: api.RouteDescriptor
+	(*descriptor.MethodOptions)(nil),  // 4: google.protobuf.MethodOptions
+	(*descriptor.ServiceOptions)(nil), // 5: google.protobuf.ServiceOptions
 }
 var file_models_api_proto_depIdxs = []int32{
-	2, // 0: api.route:extendee -> google.protobuf.MethodOptions
-	3, // 1: api.server:extendee -> google.protobuf.ServiceOptions
-	0, // 2: api.route:type_name -> api.Route
-	1, // 3: api.server:type_name -> api.Server
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	2, // [2:4] is the sub-list for extension type_name
-	0, // [0:2] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	3, // 0: api.HttpServerDescriptor.routes:type_name -> api.RouteDescriptor
+	4, // 1: api.route:extendee -> google.protobuf.MethodOptions
+	5, // 2: api.server:extendee -> google.protobuf.ServiceOptions
+	0, // 3: api.route:type_name -> api.RouteOptions
+	1, // 4: api.server:type_name -> api.ServerOptions
+	5, // [5:5] is the sub-list for method output_type
+	5, // [5:5] is the sub-list for method input_type
+	3, // [3:5] is the sub-list for extension type_name
+	1, // [1:3] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_models_api_proto_init() }
@@ -228,7 +381,7 @@ func file_models_api_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_models_api_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Route); i {
+			switch v := v.(*RouteOptions); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -240,7 +393,31 @@ func file_models_api_proto_init() {
 			}
 		}
 		file_models_api_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Server); i {
+			switch v := v.(*ServerOptions); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_models_api_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*HttpServerDescriptor); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_models_api_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RouteDescriptor); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -258,7 +435,7 @@ func file_models_api_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_models_api_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 2,
 			NumServices:   0,
 		},

@@ -78,4 +78,4 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> BlogServic
 };
 
 /// Descriptor for `Blog`. Decode as a `google.protobuf.ServiceDescriptorProto`.
-final $typed_data.Uint8List blogServiceDescriptor = $convert.base64Decode('CgRCbG9nEl4KDUNyZWF0ZUFydGljbGUSGi5ibG9nLkNyZWF0ZUFydGljbGVSZXF1ZXN0GhsuYmxvZy5DcmVhdGVBcnRpY2xlUmVzcG9uc2UiFMK7ARAKBHBvc3QSCC9hcnRpY2xlGgrKuwEGCgRibG9n');
+final $typed_data.Uint8List blogServiceDescriptor = $convert.base64Decode('CgRCbG9nEl4KDUNyZWF0ZUFydGljbGUSGi5ibG9nLkNyZWF0ZUFydGljbGVSZXF1ZXN0GhsuYmxvZy5DcmVhdGVBcnRpY2xlUmVzcG9uc2UiFMK7ARAKBHBvc3QSCC9hcnRpY2xlGgrCuwEGCgRibG9n');

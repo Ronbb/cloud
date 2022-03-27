@@ -7,28 +7,48 @@ import "google/protobuf/descriptor.proto";
 
 option go_package = "github.com/ronbb/cloud/models";
 
-// .
+// extension method option
 extend google.protobuf.MethodOptions {
-  // .
-  Route route = 3000;
+  // route
+  RouteOptions route = 3000;
 }
 
-// .
+// extension server option
 extend google.protobuf.ServiceOptions {
-  // .
-  Server server = 3001;
+  // server
+  ServerOptions server = 3000;
 }
 
-// .
-message Route {
-  //
+// route option
+message RouteOptions {
+  // method
   string method = 1;
-  //
+  // url
   string url = 2;
 }
 
-// .
-message Server {
-  //
+// server option
+message ServerOptions {
+  // server name
   string name = 1;
+}
+
+// generated http server
+message HttpServerDescriptor {
+  // server name
+  string name = 1;
+  // routes
+  repeated RouteDescriptor routes = 2;
+}
+
+// route
+message RouteDescriptor {
+  // grpc method name
+  string grpc_method = 1;
+  // url
+  string url = 2;
+  // http method
+  string method = 3;
+  // is websocket
+  bool is_web_socket = 4;
 }
