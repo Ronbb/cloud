@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/ronbb/cloud/servers/internal/utils"
+	"github.com/ronbb/cloud/utils"
 	"google.golang.org/grpc/status"
 )
 

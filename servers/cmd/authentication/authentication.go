@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/ronbb/cloud/servers/internal/database"
-	"github.com/ronbb/cloud/servers/internal/token"
+	"github.com/ronbb/cloud/servers/internal/service/token"
 	"github.com/ronbb/cloud/servers/models"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc"

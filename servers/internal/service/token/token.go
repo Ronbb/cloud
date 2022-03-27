@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/ronbb/cloud/servers/internal/utils"
+	"github.com/ronbb/cloud/utils"
 )
 
 var (

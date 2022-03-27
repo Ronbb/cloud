@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 
-	"github.com/ronbb/cloud/servers/internal/utils"
+	"github.com/ronbb/cloud/utils"
 )
 
 type (
