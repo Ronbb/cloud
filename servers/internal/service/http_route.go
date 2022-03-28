@@ -49,7 +49,7 @@ func (s *service) registerHTTPFromGRPC() {
 				})
 			}
 		} else {
-			s.httpServer.Add(route.Method, route.Url, func(c echo.Context) error {
+			s.httpServer.Add(strings.ToUpper(route.Method), route.Url, func(c echo.Context) error {
 				request := reflect.New(method.Type().In(grpcMethodInRequestIndex).Elem())
 
 				err := c.Bind(request.Interface())
