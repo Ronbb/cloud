@@ -16,7 +16,7 @@ func init() {
 		log.Fatal(err)
 	}
 
-	db = client.Database(AuthenticationGRPCServerDescriptor.ServiceName)
+	db = client.Database(AuthenticationHTTPServerDescriptor.Name)
 }
 
 func main() {
