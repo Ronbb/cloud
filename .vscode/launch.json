@@ -1,0 +1,48 @@
+{
+  // 使用 IntelliSense 了解相关属性。
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "blog",
+      "cwd": "apps\\blog",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "blog (profile mode)",
+      "cwd": "apps\\blog",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "blog (release mode)",
+      "cwd": "apps\\blog",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    },
+    {
+      "name": "rich_text_editor",
+      "cwd": "apps\\rich_text_editor\\example",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "rich_text_editor (profile mode)",
+      "cwd": "apps\\rich_text_editor\\example",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "rich_text_editor (release mode)",
+      "cwd": "apps\\rich_text_editor\\example",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    }
+  ]
+}
