@@ -33,23 +33,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: TextField(
-          onChanged: (value) {
-            //
-            print(value);
-          },
-        ),
-        // child: RichTextEditor(
-        //   textSpan: TextSpan(
-        //     text: 'root',
-        //     style: TextStyle(
-        //       color: Colors.black,
-        //     ),
-        //     children: [
-        //       TextSpan(text: 'Title'),
-        //     ],
-        //   ),
-        // ),
+        child: RichTextEditor(),
       ),
     );
   }
