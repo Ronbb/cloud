@@ -1,3 +1,4 @@
+import 'package:blog/focus_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
@@ -13,7 +14,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Ronbb\'s blog',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        useMaterial3: true,
+        colorSchemeSeed: Colors.blue,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -34,8 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _rowItem({required Widget child}) {
     return Flexible(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+      child: FocusableCard(
         child: child,
       ),
     );
@@ -57,10 +58,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   expands: true,
                   textAlignVertical: TextAlignVertical.top,
                   decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    label: Text('Edit'),
-                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    border: InputBorder.none,
                   ),
+                  autofocus: true,
                   onChanged: (value) {
                     setState(() {
                       _rawContent = value;
@@ -71,11 +71,16 @@ class _MyHomePageState extends State<MyHomePage> {
               _rowItem(
                 child: Markdown(
                   data: _rawContent,
+                  selectable: true,
                 ),
               ),
             ],
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        child: const Icon(Icons.check),
       ),
     );
   }
