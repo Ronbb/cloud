@@ -1,8 +1,15 @@
+import 'dart:async';
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+part 'cursor_controller.dart';
 part 'document.dart';
+part 'painter.dart';
+part 'rendering.dart';
 
 class RichTextEditor extends StatefulWidget {
   const RichTextEditor({Key? key}) : super(key: key);
@@ -12,20 +19,28 @@ class RichTextEditor extends StatefulWidget {
 }
 
 class RichTextEditorState extends State<RichTextEditor>
+    with TickerProviderStateMixin
     implements DeltaTextInputClient, AutofillClient {
   TextInputConnection? _textInputConnection;
 
-  String text = "";
+  late Document document;
+  late TextSelection selection;
+  late CursorController cursorController;
 
   @override
   void initState() {
     super.initState();
+    document = const _Document(blocks: []);
+    selection = const TextSelection.collapsed(offset: 0);
+    cursorController = CursorController(vsync: this);
+    cursorController.addListener(() {});
     _textInputConnection = TextInput.attach(this, textInputConfiguration);
     _textInputConnection!.show();
   }
 
   @override
   void dispose() {
+    cursorController.dispose();
     _textInputConnection?.close();
     super.dispose();
   }
@@ -46,13 +61,10 @@ class RichTextEditorState extends State<RichTextEditor>
                 focusNode.requestFocus();
               }
             },
-            child: _RichTextEditor(
-              text: TextSpan(
-                text: text,
-                style: const TextStyle(
-                  color: Color(0xFF000000),
-                ),
-              ),
+            child: _DocumentWidget(
+              cursorController: cursorController,
+              document: document,
+              selection: selection,
             ),
           );
         },
@@ -97,34 +109,12 @@ class RichTextEditorState extends State<RichTextEditor>
 
   @override
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
-    for (var delta in textEditingDeltas) {
-      if (delta is TextEditingDeltaInsertion) {
-        setState(() {
-          text = text + delta.textInserted;
-        });
-        continue;
+    setState(() {
+      for (final delta in textEditingDeltas) {
+        document = document.applyDelta(0, delta) ?? document;
+        selection = delta.selection;
       }
-      if (delta is TextEditingDeltaDeletion) {
-        setState(() {
-          final range = delta.deletedRange;
-          text = text.substring(0, range.start) + text.substring(range.end);
-        });
-        continue;
-      }
-      if (delta is TextEditingDeltaNonTextUpdate) {
-        continue;
-      }
-      if (delta is TextEditingDeltaReplacement) {
-        setState(() {
-          final range = delta.replacedRange;
-          text = text.substring(0, range.start) +
-              delta.replacementText +
-              text.substring(range.end);
-        });
-        continue;
-      }
-      debugPrint("unknown TextEditingDelta, $delta");
-    }
+    });
   }
 
   @override
@@ -183,89 +173,80 @@ class RichTextEditorState extends State<RichTextEditor>
   }
 }
 
-class _RichTextEditor extends MultiChildRenderObjectWidget {
-  _RichTextEditor({Key? key, this.text}) : super(key: key);
+class _DocumentWidget extends MultiChildRenderObjectWidget {
+  _DocumentWidget({
+    Key? key,
+    required this.document,
+    required this.selection,
+    required this.cursorController,
+  }) : super(
+          key: key,
+          children: _createBlocks(document, selection),
+        );
 
-  final TextSpan? text;
+  final Document document;
 
-  @override
-  RenderRichTextEditor createRenderObject(BuildContext context) {
-    return RenderRichTextEditor()..text = text;
+  final TextSelection selection;
+
+  final CursorController cursorController;
+
+  static List<Widget> _createBlocks(
+    Document document,
+    TextSelection selection,
+  ) {
+    int offset = 0;
+    return document.blocks.map(
+      (block) {
+        final blockSelection = selection.copyWith(
+          baseOffset: offset + selection.baseOffset,
+          extentOffset: offset + selection.extentOffset,
+        );
+        offset += block.plainText.length;
+        return _BlockWidget(
+          key: ValueKey(block),
+          block: block,
+          selection: blockSelection,
+        );
+      },
+    ).toList();
   }
 
   @override
-  void updateRenderObject(
-      BuildContext context, RenderRichTextEditor renderObject) {
-    renderObject.text = text;
+  RenderDocument createRenderObject(BuildContext context) {
+    return RenderDocument(
+      document: document,
+      selection: selection,
+      cursorController: cursorController,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderDocument renderObject) {
+    renderObject
+      ..document = document
+      ..selection = selection;
   }
 }
 
-class TextParentData extends ContainerBoxParentData<RenderBox> {
-  double? scale;
-}
+class _BlockWidget extends LeafRenderObjectWidget {
+  const _BlockWidget({
+    required this.block,
+    required this.selection,
+    Key? key,
+  }) : super(key: key);
 
-class RenderRichTextEditor extends RenderBlock {
-  final TextPainter _textPainter = TextPainter(
-    textDirection: TextDirection.ltr,
-  );
-  TextSpan? _text;
-  TextSpan? get text => _text;
-  set text(TextSpan? text) {
-    _text = text;
-    markNeedsPaint();
+  final Block block;
+  final TextSelection selection;
+
+  @override
+  RenderBlock createRenderObject(BuildContext context) {
+    return RenderBlock(block: block, selection: selection);
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
-    _textPainter.text = _text;
-    _textPainter.layout();
-    _textPainter.paint(context.canvas, offset);
+  void updateRenderObject(BuildContext context, RenderBlock renderObject) {
+    renderObject
+      ..block = block
+      ..selection = selection;
   }
-}
-
-class RenderBlock extends RenderBox
-    with
-        RelayoutWhenSystemFontsChangeMixin,
-        ContainerRenderObjectMixin<RenderBox, TextParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>
-    implements TextLayoutMetrics {
-  @override
-  void performLayout() {
-    size = constraints.biggest;
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    return defaultHitTestChildren(result, position: position);
-  }
-
-  @override
-  bool hitTestSelf(Offset position) => true;
-
-  @override
-  TextSelection getLineAtOffset(TextPosition position) {
-    // TODO: implement getLineAtOffset
-    throw UnimplementedError();
-  }
-
-  @override
-  TextPosition getTextPositionAbove(TextPosition position) {
-    // TODO: implement getTextPositionAbove
-    throw UnimplementedError();
-  }
-
-  @override
-  TextPosition getTextPositionBelow(TextPosition position) {
-    // TODO: implement getTextPositionBelow
-    throw UnimplementedError();
-  }
-
-  @override
-  TextRange getWordBoundary(TextPosition position) {
-    // TODO: implement getWordBoundary
-    throw UnimplementedError();
-  }
-
-  @override
-  void handleEvent(PointerEvent event, covariant BoxHitTestEntry entry) {}
 }
