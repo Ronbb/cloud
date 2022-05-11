@@ -30,7 +30,9 @@ class RichTextEditorState extends State<RichTextEditor>
   @override
   void initState() {
     super.initState();
-    document = const _Document(blocks: []);
+    document = _Document(blocks: [
+      Paragraph.empty(),
+    ]);
     selection = const TextSelection.collapsed(offset: 0);
     cursorController = CursorController(vsync: this);
     cursorController.addListener(() {});

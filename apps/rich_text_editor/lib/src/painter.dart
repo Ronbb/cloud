@@ -1,12 +1,46 @@
 part of 'rich_text_editor.dart';
 
-abstract class RenderBlockPainter extends ChangeNotifier {
-  bool shouldRepaint(covariant RenderBlockPainter? oldDelegate);
+abstract class BlockPainter {
+  RenderBlockPainter? _renderBlockPainter;
+  RenderBlockPainter? get renderBlockPainter => _renderBlockPainter;
+
+  @mustCallSuper
+  void attach(RenderBlockPainter renderBlockPainter) {
+    assert(_renderBlockPainter == null);
+    _renderBlockPainter = renderBlockPainter;
+  }
+
+  @mustCallSuper
+  void detach() {
+    assert(_renderBlockPainter != null);
+    _renderBlockPainter = null;
+  }
+
+  bool shouldRepaint(covariant BlockPainter? oldDelegate);
 
   void paint(RenderBlock renderBlock, PaintingContext context, Offset offset);
 }
 
-class CursorPainter extends RenderBlockPainter {
+class CursorPainter extends BlockPainter {
+  RenderDocument? _document;
+
+  @override
+  void attach(RenderBlockPainter<BlockPainter> renderBlockPainter) {
+    super.attach(renderBlockPainter);
+    _document = renderBlockPainter.parent?.parentData?.document;
+    _document?.cursorController.addListener(_onCursorTick);
+  }
+
+  @override
+  void detach() {
+    _document?.cursorController.removeListener(_onCursorTick);
+    super.detach();
+  }
+
+  void _onCursorTick() {
+    renderBlockPainter?.markNeedsPaint();
+  }
+
   @override
   void paint(RenderBlock renderBlock, PaintingContext context, Offset offset) {
     final selection = renderBlock.selection;
@@ -16,7 +50,7 @@ class CursorPainter extends RenderBlockPainter {
     final block = renderBlock.block;
     if (block is Paragraph) {
       final rect =
-          Offset.zero & Size(1.0, block._textPainter.preferredLineHeight);
+          Offset.zero & Size(2.0, block._textPainter.preferredLineHeight);
       final cursorOffset = block._textPainter.getOffsetForCaret(
         selection.base,
         rect,
@@ -26,7 +60,7 @@ class CursorPainter extends RenderBlockPainter {
         rect.shift(cursorOffset + offset),
         Paint()
           ..color = color.withOpacity(
-            renderBlock.document?.cursorController.opacity ?? 1,
+            _document?.cursorController.opacity ?? 1,
           ),
       );
     }

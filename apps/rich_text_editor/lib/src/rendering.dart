@@ -35,11 +35,11 @@ class RenderDocument extends RenderBox
     }
   }
 
-  final CursorPainter _cursorPainter = CursorPainter();
-  CursorPainter get cursorPainter => _cursorPainter;
-
   final CursorController _cursorController;
   CursorController get cursorController => _cursorController;
+
+  @override
+  bool get isRepaintBoundary => true;
 
   @override
   void setupParentData(RenderBlock child) {
@@ -100,27 +100,42 @@ class RenderBlock extends RenderBox
     }
   }
 
-  @override
-  TextParentData? get parentData => super.parentData as TextParentData?;
-
   RenderDocument? document;
+  RenderBlockPainter<CursorPainter> renderCursor =
+      RenderBlockPainter<CursorPainter>()..painter = CursorPainter();
 
-  CursorPainter? get _cursorPainter => document?.cursorPainter;
+  Iterable<RenderBlockPainter> get renderBlockPainters sync* {
+    yield renderCursor;
+  }
 
-  void _onCursorTick() {
-    markNeedsPaint();
+  void visitRenderBlockPainters(RenderBlockPainterVisitor visitor) {
+    for (final renderBlockPainter in renderBlockPainters) {
+      visitor(renderBlockPainter);
+    }
   }
 
   @override
+  TextParentData? get parentData => super.parentData as TextParentData?;
+
+  @override
+  bool get isRepaintBoundary => true;
+
+  @override
   void attach(covariant PipelineOwner owner) {
-    document = parentData?.document;
-    document?.cursorController.addListener(_onCursorTick);
     super.attach(owner);
+
+    document = parentData?.document;
+    assert(document != null);
+
+    visitRenderBlockPainters(adoptChild);
   }
 
   @override
   void detach() {
-    document?.cursorController.removeListener(_onCursorTick);
+    document = null;
+
+    visitRenderBlockPainters(dropChild);
+
     super.detach();
   }
 
@@ -128,7 +143,9 @@ class RenderBlock extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     _block.paint(this, context, offset);
     defaultPaint(context, offset);
-    _cursorPainter?.paint(this, context, offset);
+    visitRenderBlockPainters(((child) {
+      context.paintChild(child, child.parentData!.offset + offset);
+    }));
   }
 
   @override
@@ -137,6 +154,9 @@ class RenderBlock extends RenderBox
     visitChildren((child) {
       child.layout(constraints);
     });
+    visitRenderBlockPainters(((child) {
+      child.layout(constraints);
+    }));
   }
 
   @override
@@ -173,4 +193,56 @@ class RenderBlock extends RenderBox
 
   @override
   void handleEvent(PointerEvent event, covariant BoxHitTestEntry entry) {}
+}
+
+typedef RenderBlockPainterVisitor = void Function(RenderBlockPainter child);
+
+class RenderBlockPainter<T extends BlockPainter> extends RenderBox {
+  T? _painter;
+  T? get painter => _painter;
+  set painter(T? painter) {
+    if (_painter != painter) {
+      final oldPainter = _painter;
+      _painter = painter;
+      if (attached) {
+        oldPainter?.detach();
+        _painter?.attach(this);
+      }
+      markNeedsPaint();
+    }
+  }
+
+  @override
+  RenderBlock? get parent => super.parent as RenderBlock?;
+
+  @override
+  BoxParentData? get parentData => super.parentData as BoxParentData?;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final parent = this.parent;
+    if (parent != null) {
+      painter?.paint(parent, context, offset);
+    }
+  }
+
+  @override
+  void performLayout() {
+    size = Size(parent!.size.width, parent!.size.height);
+  }
+
+  @override
+  bool get isRepaintBoundary => true;
+
+  @override
+  void attach(covariant PipelineOwner owner) {
+    painter?.attach(this);
+    super.attach(owner);
+  }
+
+  @override
+  void detach() {
+    painter?.detach();
+    super.detach();
+  }
 }
