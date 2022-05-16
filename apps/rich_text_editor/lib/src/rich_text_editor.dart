@@ -115,6 +115,11 @@ class RichTextEditorState extends State<RichTextEditor>
       for (final delta in textEditingDeltas) {
         document = document.applyDelta(0, delta) ?? document;
         selection = delta.selection;
+        _textInputConnection!.setEditingState(TextEditingValue(
+          text: document.plainText,
+          selection: selection,
+          composing: delta.composing,
+        ));
       }
     });
   }
