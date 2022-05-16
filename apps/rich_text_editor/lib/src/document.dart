@@ -193,7 +193,7 @@ class Paragraph extends Block {
   @override
   Size layout(RenderBlock renderBlock) {
     if (_textPainter.text != null) {
-      _textPainter.layout();
+      _textPainter.layout(maxWidth: renderBlock.constraints.maxWidth);
       return _textPainter.size;
     }
     return Size.zero;
