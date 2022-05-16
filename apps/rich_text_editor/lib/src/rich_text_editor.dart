@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -24,7 +23,6 @@ class RichTextEditorState extends State<RichTextEditor>
   TextInputConnection? _textInputConnection;
 
   late Document document;
-  late TextSelection selection;
   late CursorController cursorController;
 
   @override
@@ -33,7 +31,6 @@ class RichTextEditorState extends State<RichTextEditor>
     document = _Document(blocks: [
       Paragraph.empty(),
     ]);
-    selection = const TextSelection.collapsed(offset: 0);
     cursorController = CursorController(vsync: this);
     cursorController.addListener(() {});
     _textInputConnection = TextInput.attach(this, textInputConfiguration);
@@ -66,7 +63,8 @@ class RichTextEditorState extends State<RichTextEditor>
             child: _DocumentWidget(
               cursorController: cursorController,
               document: document,
-              selection: selection,
+              selection: currentTextEditingValue?.selection ??
+                  const TextSelection.collapsed(offset: 0),
             ),
           );
         },
@@ -114,12 +112,13 @@ class RichTextEditorState extends State<RichTextEditor>
     setState(() {
       for (final delta in textEditingDeltas) {
         document = document.applyDelta(0, delta) ?? document;
-        selection = delta.selection;
-        _textInputConnection!.setEditingState(TextEditingValue(
+
+        currentTextEditingValue = TextEditingValue(
           text: document.plainText,
-          selection: selection,
+          selection: delta.selection,
           composing: delta.composing,
-        ));
+        );
+        _textInputConnection!.setEditingState(currentTextEditingValue!);
       }
     });
   }
