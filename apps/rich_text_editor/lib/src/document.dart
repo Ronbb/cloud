@@ -16,15 +16,15 @@ abstract class Node {
 abstract class Inline extends Node {
   const Inline();
 
-  Inline? applyInsertion(int offset, TextEditingDeltaInsertion delta) => null;
+  Inline? applyInsertion(int offset, TextEditingDeltaInsertion delta) => this;
 
-  Inline? applyDeletion(int offset, TextEditingDeltaDeletion delta) => null;
+  Inline? applyDeletion(int offset, TextEditingDeltaDeletion delta) => this;
 
   Inline? applyNonTextUpdate(int offset, TextEditingDeltaNonTextUpdate delta) =>
-      null;
+      this;
 
   Inline? applyReplacement(int offset, TextEditingDeltaReplacement delta) =>
-      null;
+      this;
 
   @override
   Inline? applyDelta(int offset, TextEditingDelta delta) {
