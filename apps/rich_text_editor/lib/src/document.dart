@@ -57,7 +57,7 @@ abstract class Block extends Node {
 
   @override
   String get plainText =>
-      inlines.map((inline) => inline.plainText).join() + '\n';
+      '${inlines.map((inline) => inline.plainText).join()}\n';
 
   @override
   Block? applyDelta(int offset, TextEditingDelta delta);
