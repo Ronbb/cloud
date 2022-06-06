@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+part 'actions.dart';
 part 'cursor_controller.dart';
 part 'document.dart';
 part 'painter.dart';
@@ -25,6 +26,62 @@ class RichTextEditorState extends State<RichTextEditor>
   late Document document;
   late CursorController cursorController;
 
+  Action<T> _overridable<T extends Intent>(Action<T> defaultAction) {
+    return Action<T>.overridable(
+      defaultAction: defaultAction,
+      context: context,
+    );
+  }
+
+  Action<T> _action<T extends Intent>() {
+    return Action<T>.overridable(
+      defaultAction: CallbackAction<T>(onInvoke: _onInvoke),
+      context: context,
+    );
+  }
+
+  late final Map<Type, Action<Intent>> _actions = {
+    DeleteCharacterIntent: _action<DeleteCharacterIntent>(),
+    DeleteToNextWordBoundaryIntent: _action<DeleteToNextWordBoundaryIntent>(),
+    DeleteToLineBreakIntent: _action<DeleteToLineBreakIntent>(),
+    UpdateSelectionIntent: _action<UpdateSelectionIntent>(),
+    DoNothingAndStopPropagationTextIntent:
+        _action<DoNothingAndStopPropagationTextIntent>(),
+    ReplaceTextIntent: _action<ReplaceTextIntent>(),
+    DirectionalFocusIntent: _action<DirectionalFocusIntent>(),
+    DismissIntent: _action<DismissIntent>(),
+    ExtendSelectionByCharacterIntent: _overridable(
+      ExtendSelectionByCharacterAction(this),
+    ),
+    ExtendSelectionToNextWordBoundaryIntent:
+        _action<ExtendSelectionToNextWordBoundaryIntent>(),
+    ExtendSelectionToLineBreakIntent:
+        _action<ExtendSelectionToLineBreakIntent>(),
+    ExpandSelectionToLineBreakIntent:
+        _action<ExpandSelectionToLineBreakIntent>(),
+    ExpandSelectionToDocumentBoundaryIntent:
+        _action<ExpandSelectionToDocumentBoundaryIntent>(),
+    ExtendSelectionVerticallyToAdjacentLineIntent:
+        _action<ExtendSelectionVerticallyToAdjacentLineIntent>(),
+    ExtendSelectionToDocumentBoundaryIntent:
+        _action<ExtendSelectionToDocumentBoundaryIntent>(),
+    ExtendSelectionToNextWordBoundaryOrCaretLocationIntent:
+        _action<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent>(),
+    ScrollToDocumentBoundaryIntent: _action<ScrollToDocumentBoundaryIntent>(),
+    SelectAllTextIntent: _action<SelectAllTextIntent>(),
+    CopySelectionTextIntent: _action<CopySelectionTextIntent>(),
+    PasteTextIntent: _action<PasteTextIntent>(),
+  };
+
+  Object? _onInvoke(Intent intent) {
+    debugPrint(intent.toString());
+    return null;
+  }
+
+  void refresh() {
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
@@ -32,7 +89,6 @@ class RichTextEditorState extends State<RichTextEditor>
       Paragraph.empty(),
     ]);
     cursorController = CursorController(vsync: this);
-    cursorController.addListener(() {});
     _textInputConnection = TextInput.attach(this, textInputConfiguration);
     _textInputConnection!.show();
   }
@@ -46,43 +102,52 @@ class RichTextEditorState extends State<RichTextEditor>
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      onFocusChange: (value) {
-        debugPrint('focus changed $value');
-      },
-      child: Builder(
-        builder: (context) {
-          return TextSelectionGestureDetector(
-            onTapDown: (details) {
-              final FocusNode focusNode = Focus.of(context);
-              final bool hasFocus = focusNode.hasFocus;
-              if (!hasFocus) {
-                focusNode.requestFocus();
-              }
+    return Actions(
+      actions: _actions,
+      child: DefaultTextEditingShortcuts(
+        child: Focus(
+          onFocusChange: (value) {
+            debugPrint('focus changed $value');
+          },
+          child: Builder(
+            builder: (context) {
+              return TextSelectionGestureDetector(
+                onTapDown: (details) {
+                  final FocusNode focusNode = Focus.of(context);
+                  final bool hasFocus = focusNode.hasFocus;
+                  if (!hasFocus) {
+                    focusNode.requestFocus();
+                  }
+                },
+                child: _DocumentWidget(
+                  cursorController: cursorController,
+                  document: document,
+                  selection: currentTextEditingValue?.selection ??
+                      const TextSelection.collapsed(offset: 0),
+                ),
+              );
             },
-            child: _DocumentWidget(
-              cursorController: cursorController,
-              document: document,
-              selection: currentTextEditingValue?.selection ??
-                  const TextSelection.collapsed(offset: 0),
-            ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 
   @override
   void connectionClosed() {
-    // TODO: implement connectionClosed
     debugPrint('connectionClosed');
   }
 
   @override
   AutofillScope? currentAutofillScope;
 
+  TextEditingValue? _currentTextEditingValue;
   @override
-  TextEditingValue? currentTextEditingValue;
+  TextEditingValue? get currentTextEditingValue => _currentTextEditingValue;
+  set currentTextEditingValue(TextEditingValue? value) {
+    _currentTextEditingValue = value;
+    _textInputConnection!.setEditingState(_currentTextEditingValue!);
+  }
 
   @override
   void performAction(TextInputAction action) {
@@ -111,14 +176,13 @@ class RichTextEditorState extends State<RichTextEditor>
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
     setState(() {
       for (final delta in textEditingDeltas) {
-        document = document.applyDelta(0, delta) ?? document;
+        document = document.applyDelta(delta);
 
         currentTextEditingValue = TextEditingValue(
           text: document.plainText,
           selection: delta.selection,
           composing: delta.composing,
         );
-        _textInputConnection!.setEditingState(currentTextEditingValue!);
       }
     });
   }

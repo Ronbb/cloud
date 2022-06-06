@@ -5,7 +5,7 @@ abstract class Node {
 
   String get plainText;
 
-  Node? applyDelta(int offset, TextEditingDelta delta);
+  Node? applyDelta(TextEditingDelta delta, {int offset = 0});
 
   @override
   String toString() {
@@ -16,38 +16,52 @@ abstract class Node {
 abstract class Inline extends Node {
   const Inline();
 
-  Inline? applyInsertion(int offset, TextEditingDeltaInsertion delta) => this;
+  InlineSpan get span;
 
-  Inline? applyDeletion(int offset, TextEditingDeltaDeletion delta) => this;
-
-  Inline? applyNonTextUpdate(int offset, TextEditingDeltaNonTextUpdate delta) =>
+  Inline? applyDeltaInsertion(
+    int offset,
+    TextEditingDeltaInsertion delta,
+  ) =>
       this;
 
-  Inline? applyReplacement(int offset, TextEditingDeltaReplacement delta) =>
+  Inline? applyDeltaDeletion(
+    int offset,
+    TextEditingDeltaDeletion delta,
+  ) =>
+      this;
+
+  Inline? applyDeltaNonTextUpdate(
+    int offset,
+    TextEditingDeltaNonTextUpdate delta,
+  ) =>
+      this;
+
+  Inline? applyDeltaReplacement(
+    int offset,
+    TextEditingDeltaReplacement delta,
+  ) =>
       this;
 
   @override
-  Inline? applyDelta(int offset, TextEditingDelta delta) {
+  Inline? applyDelta(TextEditingDelta delta, {int offset = 0}) {
     if (delta is TextEditingDeltaInsertion) {
-      return applyInsertion(offset, delta);
+      return applyDeltaInsertion(offset, delta);
     }
 
     if (delta is TextEditingDeltaDeletion) {
-      return applyDeletion(offset, delta);
+      return applyDeltaDeletion(offset, delta);
     }
 
     if (delta is TextEditingDeltaNonTextUpdate) {
-      return applyNonTextUpdate(offset, delta);
+      return applyDeltaNonTextUpdate(offset, delta);
     }
 
     if (delta is TextEditingDeltaReplacement) {
-      return applyReplacement(offset, delta);
+      return applyDeltaReplacement(offset, delta);
     }
 
     throw UnimplementedError("unknown TextEditingDelta, $delta");
   }
-
-  InlineSpan get span;
 }
 
 abstract class Block extends Node {
@@ -60,7 +74,7 @@ abstract class Block extends Node {
       '${inlines.map((inline) => inline.plainText).join()}\n';
 
   @override
-  Block? applyDelta(int offset, TextEditingDelta delta);
+  Block? applyDelta(TextEditingDelta delta, {int offset = 0});
 
   void paint(
     covariant RenderBlock renderBlock,
@@ -81,7 +95,7 @@ class Text extends Inline {
   String get plainText => text;
 
   @override
-  Text? applyDeletion(int offset, TextEditingDeltaDeletion delta) {
+  Text? applyDeltaDeletion(int offset, TextEditingDeltaDeletion delta) {
     final range = delta.deletedRange;
     final length = plainText.length;
     final start = range.start - offset;
@@ -100,7 +114,7 @@ class Text extends Inline {
   }
 
   @override
-  Text? applyInsertion(int offset, TextEditingDeltaInsertion delta) {
+  Text? applyDeltaInsertion(int offset, TextEditingDeltaInsertion delta) {
     final insertionOffset = delta.insertionOffset - offset;
     final length = plainText.length;
     if (insertionOffset < 0 || insertionOffset > length) {
@@ -115,7 +129,7 @@ class Text extends Inline {
   }
 
   @override
-  Text? applyReplacement(int offset, TextEditingDeltaReplacement delta) {
+  Text? applyDeltaReplacement(int offset, TextEditingDeltaReplacement delta) {
     final range = delta.replacedRange;
     final length = plainText.length;
     final start = range.start - offset;
@@ -147,7 +161,7 @@ abstract class Document extends Node {
   String get plainText => blocks.map((inline) => inline.plainText).join();
 
   @override
-  Document? applyDelta(int offset, TextEditingDelta delta);
+  Document applyDelta(TextEditingDelta delta, {int offset = 0});
 }
 
 class Paragraph extends Block {
@@ -171,16 +185,12 @@ class Paragraph extends Block {
     );
   }
 
-  @override
-  final List<Inline> inlines;
-
-  @override
-  Block? applyDelta(int offset, TextEditingDelta delta) {
+  Block? _update(_InlineUpdater updater) {
     List<Inline> newInlines = inlines.isEmpty ? [const Text.empty()] : inlines;
     newInlines = newInlines.fold<List<Inline>>(
       [],
       ((previousValue, inline) {
-        final newInline = inline.applyDelta(offset, delta);
+        final newInline = updater(inline);
         if (newInline != null) {
           previousValue.add(newInline);
         }
@@ -188,6 +198,14 @@ class Paragraph extends Block {
       }),
     );
     return Paragraph(inlines: newInlines);
+  }
+
+  @override
+  final List<Inline> inlines;
+
+  @override
+  Block? applyDelta(TextEditingDelta delta, {int offset = 0}) {
+    return _update((inline) => inline.applyDelta(offset: offset, delta));
   }
 
   @override
@@ -205,6 +223,9 @@ class Paragraph extends Block {
   }
 }
 
+typedef _InlineUpdater = Inline? Function(Inline inline);
+typedef _BlockUpdater = Block? Function(Block block);
+
 class _Document extends Document {
   const _Document({
     required this.blocks,
@@ -213,19 +234,25 @@ class _Document extends Document {
   @override
   final List<Block> blocks;
 
-  @override
-  Document? applyDelta(int offset, TextEditingDelta delta) {
+  Document _update(_BlockUpdater updater) {
     List<Block> newBlocks = blocks.isEmpty ? [Paragraph.empty()] : blocks;
     newBlocks = newBlocks.fold<List<Block>>(
       [],
-      ((previousValue, block) {
-        final newBlock = block.applyDelta(offset, delta);
+      (previousValue, block) {
+        final newBlock = updater(block);
         if (newBlock != null) {
           previousValue.add(newBlock);
         }
         return previousValue;
-      }),
+      },
     );
     return _Document(blocks: newBlocks);
+  }
+
+  @override
+  Document applyDelta(TextEditingDelta delta, {int offset = 0}) {
+    return _update(
+      (block) => block.applyDelta(offset: offset, delta),
+    );
   }
 }

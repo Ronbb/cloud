@@ -9,13 +9,13 @@ class CursorController extends AnimationController {
           vsync: vsync,
           duration: animationDuration,
         ) {
-    _timer = Timer.periodic(blinkInterval, _onTick);
+    start();
   }
   final Duration blinkInterval;
 
   final Curve _curve = Curves.easeOut;
 
-  late Timer _timer;
+  Timer? _timer;
 
   bool _visible = true;
 
@@ -26,9 +26,16 @@ class CursorController extends AnimationController {
     animateTo(_visible ? upperBound : lowerBound, curve: _curve);
   }
 
+  void start() {
+    _timer?.cancel();
+    _timer = Timer.periodic(blinkInterval, _onTick);
+    _visible = true;
+    super.value = super.upperBound;
+  }
+
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 }
