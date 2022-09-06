@@ -41,12 +41,11 @@ class RichTextEditorState extends State<RichTextEditor>
   }
 
   late final Map<Type, Action<Intent>> _actions = {
-    DeleteCharacterIntent: _action<DeleteCharacterIntent>(),
+    DeleteCharacterIntent: _overridable(DeleteCharacterAction(this)),
     DeleteToNextWordBoundaryIntent: _action<DeleteToNextWordBoundaryIntent>(),
     DeleteToLineBreakIntent: _action<DeleteToLineBreakIntent>(),
     UpdateSelectionIntent: _action<UpdateSelectionIntent>(),
-    DoNothingAndStopPropagationTextIntent:
-        _action<DoNothingAndStopPropagationTextIntent>(),
+    DoNothingAndStopPropagationTextIntent: DoNothingAction(consumesKey: false),
     ReplaceTextIntent: _action<ReplaceTextIntent>(),
     DirectionalFocusIntent: _action<DirectionalFocusIntent>(),
     DismissIntent: _action<DismissIntent>(),
@@ -79,6 +78,7 @@ class RichTextEditorState extends State<RichTextEditor>
   }
 
   void refresh() {
+    currentTextEditingValue = _currentTextEditingValue;
     setState(() {});
   }
 
@@ -180,7 +180,7 @@ class RichTextEditorState extends State<RichTextEditor>
       for (final delta in textEditingDeltas) {
         document = document.applyDelta(delta);
 
-        currentTextEditingValue = TextEditingValue(
+        _currentTextEditingValue = TextEditingValue(
           text: document.plainText,
           selection: delta.selection,
           composing: delta.composing,
