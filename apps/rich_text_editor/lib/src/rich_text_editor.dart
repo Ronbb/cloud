@@ -146,7 +146,9 @@ class RichTextEditorState extends State<RichTextEditor>
   TextEditingValue? get currentTextEditingValue => _currentTextEditingValue;
   set currentTextEditingValue(TextEditingValue? value) {
     _currentTextEditingValue = value;
-    _textInputConnection!.setEditingState(_currentTextEditingValue!);
+    if (_currentTextEditingValue != null) {
+      _textInputConnection!.setEditingState(_currentTextEditingValue!);
+    }
   }
 
   @override
