@@ -41,6 +41,24 @@ class CursorPainter extends BlockPainter {
     renderBlockPainter?.markNeedsPaint();
   }
 
+  Rect? calculateCursorRect(Block block) {
+    if (block is TextPainterProviderMixin) {
+      final rect =
+          Offset.zero & Size(2.0, block.textPainter.preferredLineHeight);
+      return rect;
+    }
+
+    return null;
+  }
+
+  Offset? calculateCursorOffset(Block block, Rect rect, TextPosition position) {
+    if (block is TextPainterProviderMixin) {
+      return block.textPainter.getOffsetForCaret(position, rect);
+    }
+
+    return null;
+  }
+
   @override
   void paint(RenderBlock renderBlock, PaintingContext context, Offset offset) {
     final selection = renderBlock.selection;
@@ -48,21 +66,20 @@ class CursorPainter extends BlockPainter {
       return;
     }
     final block = renderBlock.block;
-    if (block is Paragraph) {
-      final rect =
-          Offset.zero & Size(2.0, block._textPainter.preferredLineHeight);
-      final cursorOffset = block._textPainter.getOffsetForCaret(
-        selection.base,
-        rect,
-      );
-      const color = Color(0xFF0099FF);
-      context.canvas.drawRect(
-        rect.shift(cursorOffset + offset),
-        Paint()
-          ..color = color.withOpacity(
-            _document?.cursorController.opacity ?? 1,
-          ),
-      );
+    final rect = calculateCursorRect(block);
+    if (rect != null) {
+      final cursorOffset = calculateCursorOffset(block, rect, selection.base);
+
+      if (cursorOffset != null) {
+        const color = Color(0xFF0099FF);
+        context.canvas.drawRect(
+          rect.shift(cursorOffset + offset),
+          Paint()
+            ..color = color.withOpacity(
+              _document?.cursorController.opacity ?? 1,
+            ),
+        );
+      }
     }
   }
 

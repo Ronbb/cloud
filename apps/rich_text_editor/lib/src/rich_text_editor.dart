@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 part 'actions.dart';
@@ -21,6 +22,8 @@ class RichTextEditor extends StatefulWidget {
 class RichTextEditorState extends State<RichTextEditor>
     with TickerProviderStateMixin
     implements DeltaTextInputClient, AutofillClient {
+  final _documentKey = GlobalKey();
+
   TextInputConnection? _textInputConnection;
 
   late Document document;
@@ -77,6 +80,90 @@ class RichTextEditorState extends State<RichTextEditor>
     return null;
   }
 
+  bool get _hasInputConnection => _textInputConnection?.attached ?? false;
+
+  RenderDocument get _renderDocument =>
+      _documentKey.currentContext!.findRenderObject()! as RenderDocument;
+
+  bool get _hasRenderDocument =>
+      _documentKey.currentContext?.findRenderObject() != null;
+
+  void _openConnection() {
+    if (!_hasInputConnection) {
+      _textInputConnection = TextInput.attach(this, textInputConfiguration);
+      _textInputConnection!.show();
+      _updateSizeAndTransform();
+      _updateComposingRect();
+      _updateCaretRect();
+    } else {
+      _textInputConnection!.show();
+    }
+  }
+
+  void _closeConnection() {
+    _textInputConnection?.close();
+  }
+
+  void _updateComposingRect() {
+    if (_hasInputConnection) {
+      if (_hasRenderDocument) {
+        var range = _currentTextEditingValue?.composing ??
+            _currentTextEditingValue?.selection;
+        if (range != null && range.isValid) {
+          range = _currentTextEditingValue?.selection;
+        }
+        if (range != null && range.isValid) {
+          var rect = _renderDocument.getRectForComposingRange(range);
+          if (rect == null) {
+            final offset = range.start;
+            rect = _renderDocument.getLastLocalRectForCursor(
+              TextPosition(offset: offset),
+            );
+          }
+          if (rect != null) {
+            _textInputConnection!.setComposingRect(rect);
+          }
+        }
+      }
+      SchedulerBinding.instance.addPostFrameCallback(
+        (Duration _) => _updateComposingRect(),
+      );
+    }
+  }
+
+  void _updateCaretRect() {
+    if (_hasInputConnection) {
+      if (_hasRenderDocument) {
+        final selection = _renderDocument.selection;
+        if (selection.isValid && selection.isCollapsed) {
+          final currentTextPosition =
+              TextPosition(offset: selection.baseOffset);
+          final caretRect =
+              _renderDocument.getLastLocalRectForCursor(currentTextPosition);
+          if (caretRect != null) {
+            _textInputConnection!.setCaretRect(caretRect);
+          }
+        }
+      }
+      SchedulerBinding.instance.addPostFrameCallback(
+        (Duration _) => _updateCaretRect(),
+      );
+    }
+  }
+
+  void _updateSizeAndTransform() {
+    if (_hasInputConnection) {
+      if (_hasRenderDocument) {
+        final Size size = _renderDocument.size;
+        final Matrix4 transform = _renderDocument.getTransformTo(null);
+        _textInputConnection!.setEditableSizeAndTransform(size, transform);
+        // _updateSelectionRects();
+      }
+      SchedulerBinding.instance
+          .addPostFrameCallback((Duration _) => _updateSizeAndTransform());
+    }
+  }
+
   void refresh() {
     currentTextEditingValue = _currentTextEditingValue;
     setState(() {});
@@ -89,14 +176,13 @@ class RichTextEditorState extends State<RichTextEditor>
       Paragraph.empty(),
     ]);
     cursorController = CursorController(vsync: this);
-    _textInputConnection = TextInput.attach(this, textInputConfiguration);
-    _textInputConnection!.show();
+    _openConnection();
   }
 
   @override
   void dispose() {
     cursorController.dispose();
-    _textInputConnection?.close();
+    _closeConnection();
     super.dispose();
   }
 
@@ -120,6 +206,7 @@ class RichTextEditorState extends State<RichTextEditor>
                   }
                 },
                 child: _DocumentWidget(
+                  key: _documentKey,
                   cursorController: cursorController,
                   document: document,
                   selection: currentTextEditingValue?.selection ??

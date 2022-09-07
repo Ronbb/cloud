@@ -85,6 +85,10 @@ abstract class Block extends Node {
   Size layout(covariant RenderBlock renderBlock);
 }
 
+mixin TextPainterProviderMixin on Block {
+  TextPainter get textPainter;
+}
+
 class Text extends Inline {
   const Text(this.text);
   const Text.empty() : text = "";
@@ -164,12 +168,15 @@ abstract class Document extends Node {
   Document applyDelta(TextEditingDelta delta, {int offset = 0});
 }
 
-class Paragraph extends Block {
+class Paragraph extends Block with TextPainterProviderMixin {
   Paragraph({
     required this.inlines,
   }) : _textPainter = _createTextPainter(inlines);
 
   final TextPainter _textPainter;
+
+  @override
+  TextPainter get textPainter => _textPainter;
 
   factory Paragraph.empty() => Paragraph(inlines: const [Text.empty()]);
 

@@ -36,6 +36,10 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: EdgeInsets.all(8.0),
         child: RichTextEditor(),
       ),
+      // body: Padding(
+      //   padding: EdgeInsets.all(8.0),
+      //   child: TextField(),
+      // ),
     );
   }
 }

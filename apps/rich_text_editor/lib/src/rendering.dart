@@ -38,6 +38,65 @@ class RenderDocument extends RenderBox
   final CursorController _cursorController;
   CursorController get cursorController => _cursorController;
 
+  Rect? getRectForComposingRange(TextRange range) {
+    if (!range.isValid || range.isCollapsed) {
+      return null;
+    }
+
+    final List<TextBox> boxes = [];
+
+    visitChildren((child) {
+      final block = (child as RenderBlock).block;
+      if (block is TextPainterProviderMixin) {
+        boxes.addAll(block.textPainter.getBoxesForSelection(
+          TextSelection(baseOffset: range.start, extentOffset: range.end),
+          // boxHeightStyle: selectionHeightStyle,
+          // boxWidthStyle: selectionWidthStyle,
+        ));
+      }
+    });
+
+    return boxes.fold(
+      null,
+      (Rect? rect, TextBox incoming) =>
+          rect?.expandToInclude(incoming.toRect()) ?? incoming.toRect(),
+    );
+  }
+
+  Rect? getLastLocalRectForCursor(TextPosition cursorPosition) {
+    Rect? calculated;
+    visitChildren((child) {
+      final renderBlock = child as RenderBlock;
+      final block = renderBlock.block;
+      if (block is TextPainterProviderMixin) {
+        final renderCursor = renderBlock.renderCursor;
+        final painter = renderCursor.painter;
+        if (painter == null) {
+          return;
+        }
+        var rect = painter.calculateCursorRect(block);
+        if (rect == null) {
+          return;
+        }
+
+        final offset = painter.calculateCursorOffset(
+          block,
+          rect,
+          cursorPosition,
+        );
+        if (offset == null) {
+          return;
+        }
+
+        rect = rect.shift(offset);
+        final globalOffset = renderBlock.snapToPhysicalPixel(rect.topLeft);
+        calculated = rect.shift(globalOffset);
+      }
+    });
+
+    return calculated;
+  }
+
   @override
   bool get isRepaintBoundary => true;
 
@@ -112,6 +171,21 @@ class RenderBlock extends RenderBox
     for (final renderBlockPainter in renderBlockPainters) {
       visitor(renderBlockPainter);
     }
+  }
+
+  Offset snapToPhysicalPixel(Offset sourceOffset) {
+    final Offset globalOffset = localToGlobal(sourceOffset);
+    const double pixelMultiple = 1.0 / /*_devicePixelRatio*/ 1.0;
+    return Offset(
+      globalOffset.dx.isFinite
+          ? (globalOffset.dx / pixelMultiple).round() * pixelMultiple -
+              globalOffset.dx
+          : 0,
+      globalOffset.dy.isFinite
+          ? (globalOffset.dy / pixelMultiple).round() * pixelMultiple -
+              globalOffset.dy
+          : 0,
+    );
   }
 
   @override
