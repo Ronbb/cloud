@@ -205,6 +205,45 @@ class RichTextEditorState extends State<RichTextEditor>
                     focusNode.requestFocus();
                   }
                 },
+                onDoubleTapDown: (details) {
+                  debugPrint('onDoubleTapDown');
+                },
+                onDragSelectionEnd: (details) {
+                  debugPrint('onDragSelectionEnd');
+                },
+                onDragSelectionStart: (details) {
+                  debugPrint('onDragSelectionStart');
+                },
+                onDragSelectionUpdate: (startDetails, updateDetails) {
+                  debugPrint('onDragSelectionUpdate');
+                },
+                onForcePressEnd: (details) {
+                  debugPrint('onForcePressEnd');
+                },
+                onForcePressStart: (details) {
+                  debugPrint('onForcePressStart');
+                },
+                onSecondaryTap: () {
+                  debugPrint('onSecondaryTap');
+                },
+                onSecondaryTapDown: (details) {
+                  debugPrint('onSecondaryTapDown');
+                },
+                onSingleLongTapEnd: (details) {
+                  debugPrint('onSingleLongTapEnd');
+                },
+                onSingleLongTapMoveUpdate: (details) {
+                  debugPrint('onSingleLongTapMoveUpdate');
+                },
+                onSingleLongTapStart: (details) {
+                  debugPrint('onSingleLongTapStart');
+                },
+                onSingleTapCancel: () {
+                  debugPrint('onSingleTapCancel');
+                },
+                onSingleTapUp: (details) {
+                  debugPrint('onSingleTapUp');
+                },
                 child: _DocumentWidget(
                   key: _documentKey,
                   cursorController: cursorController,
