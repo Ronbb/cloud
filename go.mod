@@ -52,7 +52,7 @@ require (
 
 require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
-	github.com/labstack/echo/v4 v4.7.2
+	github.com/labstack/echo/v4 v4.9.0
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/prometheus/client_golang v1.12.1
 	go.mongodb.org/mongo-driver v1.8.4
