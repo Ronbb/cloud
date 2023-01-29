@@ -1,0 +1,51 @@
+.home {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-title {
+  min-height: 90vh;
+  width: 100%;
+  max-width: 1080px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  align-self: center;
+}
+
+.home-title-left {
+  flex: 2;
+}
+
+.home-title-left-header {
+  font-size: 4rem;
+  margin-block: 1rem;
+}
+
+.home-title-left-item {
+  margin-block: 0.5rem;
+}
+
+.home-title-left-link {
+  margin-block: 0.5rem;
+}
+
+.home-title-right {
+  flex: 1;
+  position: relative;
+}
+
+.home-title-right-avatar {
+  border-radius: 8px;
+}
+
+.home-title-right-avatar-background {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  filter: blur(32px);
+  transform: scale(1.1);
+}
